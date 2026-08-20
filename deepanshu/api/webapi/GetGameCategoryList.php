@@ -14,7 +14,7 @@ $jsonData = '{
             "categoryName": "彩票",
             "state": 1,
             "sort": 10,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_202503131718208r77.png"
+            "categoryImg": "/assets/png/iconLottery-e1521a51.png"
         },
         {
             "id": 8,
@@ -23,7 +23,7 @@ $jsonData = '{
             "categoryName": "小游戏",
             "state": 1,
             "sort": 9,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_20250313171619xdvp.png"
+            "categoryImg": "/assets/png/game_dice-596db528.png"
         },
         {
             "id": 2,
@@ -32,7 +32,7 @@ $jsonData = '{
             "categoryName": "热门游戏",
             "state": 1,
             "sort": 8,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_20250313171546obyl.png"
+            "categoryImg": "/assets/png/all-5227f2a4.png"
         },
         {
             "id": 4,
@@ -41,7 +41,7 @@ $jsonData = '{
             "categoryName": "电子游戏",
             "state": 1,
             "sort": 6,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_202503131718274ean.png"
+            "categoryImg": "/assets/png/casino_a-037fd34b.png"
         },
         {
             "id": 3,
@@ -50,7 +50,7 @@ $jsonData = '{
             "categoryName": "捕鱼游戏",
             "state": 1,
             "sort": 5,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_202503131716285jqk.png"
+            "categoryImg": "/assets/png/fishing_a-8b8f8c2c.png"
         },
         {
             "id": 7,
@@ -59,7 +59,7 @@ $jsonData = '{
             "categoryName": "棋牌游戏",
             "state": 1,
             "sort": 5,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_202503131717268awj.png"
+            "categoryImg": "/assets/png/game_dice_sit-13373d77.png"
         },
         {
             "id": 6,
@@ -68,7 +68,7 @@ $jsonData = '{
             "categoryName": "视讯游戏",
             "state": 1,
             "sort": 4,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_202503131718032ig4.png"
+            "categoryImg": "/assets/png/video-0216ce19.png"
         },
         {
             "id": 5,
@@ -77,7 +77,7 @@ $jsonData = '{
             "categoryName": "体育游戏",
             "state": 1,
             "sort": 1,
-            "categoryImg": "https://winingbazzar.com/Jalwa/gamecategory/gamecategory_20250315182024qtyt.png"
+            "categoryImg": "/assets/png/activityIcon1-67076a48.png"
         }
     ],
     "code": 0,

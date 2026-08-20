@@ -3,19 +3,19 @@
  
         {
             "url": "https://t.me/channel_91clubofficial",
-            "bannerUrl": "https://winingbazzar.com/Jalwa/banner/Banner_20250319135017qkrx.jpg"
+            "bannerUrl": "/assets/png/Banner_20240131164516hwsn.jpg"
         },
         {
             "url": "/#/activity/ActivityDetail?id=28",
-            "bannerUrl": "https://winingbazzar.com/Jalwa/banner/Banner_20250319132416d7h9.jpg"
+            "bannerUrl": "/assets/png/Banner_20240131164516hwsn.jpg"
         },
         {
             "url": "",
-            "bannerUrl": "https://winingbazzar.com/Jalwa/banner/Banner_20250319134711g6c7.jpg"
+            "bannerUrl": "/assets/png/Banner_20240131164516hwsn.jpg"
         },
         {
             "url": "https://www.91club.com/",
-            "bannerUrl": "https://winingbazzar.com/Jalwa/banner/Banner_202503191331431vwd.jpg"
+            "bannerUrl": "/assets/png/Banner_20240131164516hwsn.jpg"
        
         }
     ],
