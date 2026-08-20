@@ -13649,22 +13649,22 @@ INSERT INTO `5d` (`id`, `period`, `result`, `game`, `status`, `time`) VALUES
 
 CREATE TABLE `admin` (
   `id` int(11) NOT NULL,
-  `wingo1` text NOT NULL DEFAULT '-1',
-  `wingo3` text NOT NULL DEFAULT '-1',
-  `wingo5` text NOT NULL DEFAULT '-1',
-  `wingo10` text NOT NULL DEFAULT '-1',
-  `k5d` text NOT NULL DEFAULT '\'-1\'',
-  `k5d3` text NOT NULL DEFAULT '\'-1\'',
-  `k5d5` text DEFAULT '\'-1\'',
-  `k5d10` text NOT NULL DEFAULT '\'-1\'',
-  `k3d` text NOT NULL DEFAULT '\'-1\'',
-  `k3d3` text NOT NULL DEFAULT '\'-1\'',
-  `k3d5` text NOT NULL DEFAULT '\'-1\'',
-  `k3d10` text NOT NULL DEFAULT '\'-1\'',
+  `wingo1` varchar(255) NOT NULL DEFAULT '-1',
+  `wingo3` varchar(255) NOT NULL DEFAULT '-1',
+  `wingo5` varchar(255) NOT NULL DEFAULT '-1',
+  `wingo10` varchar(255) NOT NULL DEFAULT '-1',
+  `k5d` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k5d3` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k5d5` varchar(255) DEFAULT '\'-1\'',
+  `k5d10` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k3d` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k3d3` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k3d5` varchar(255) NOT NULL DEFAULT '\'-1\'',
+  `k3d10` varchar(255) NOT NULL DEFAULT '\'-1\'',
   `win_rate` int(11) NOT NULL DEFAULT 0,
   `telegram` varchar(100) NOT NULL DEFAULT '0',
   `cskh` varchar(100) NOT NULL DEFAULT '0',
-  `app` text DEFAULT '0'
+  `app` varchar(255) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -27551,7 +27551,7 @@ CREATE TABLE `recharge` (
   `type` varchar(10) NOT NULL DEFAULT '0',
   `status` int(11) NOT NULL DEFAULT 0,
   `today` varchar(50) NOT NULL DEFAULT '0',
-  `url` text NOT NULL DEFAULT '0',
+  `url` varchar(255) NOT NULL DEFAULT '0',
   `time` varchar(30) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
