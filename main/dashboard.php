@@ -120,7 +120,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$pending = $row["pending"];
-							echo number_format($pending,0);                  																  
+							echo number_format((float)($pending ?? 0),0);                  																  
 						  }
 						  else 
 						  {
@@ -142,7 +142,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$succ_w = $row["succ_w"];
-							echo number_format($succ_w,0);                  																  
+							echo number_format((float)($succ_w ?? 0),0);                  																  
 						  }
 						  else 
 						  {
@@ -164,7 +164,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$zero_bl = $row["wallt"];
-							echo number_format($zero_bl,2);                  																  
+							echo number_format((float)($zero_bl ?? 0),2);                  																  
 						  }
 						  else 
 						  {
@@ -220,7 +220,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$pending = $row["2"];
-							echo number_format($pending);                 																  
+							echo number_format((float)($pending ?? 0));                 																  
 						  }
 						  else 
 						  {
@@ -248,7 +248,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$pending = $row["pending"];
-							echo number_format($pending,0);                																  
+							echo number_format((float)($pending ?? 0),0);                																  
 						  }
 						  else 
 						  {
@@ -276,7 +276,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$pending_w = $row["pending_w"];
-							echo number_format($pending_w);                 																  
+							echo number_format((float)($pending_w ?? 0));                 																  
 						  }
 						  else 
 						  {
@@ -304,7 +304,7 @@
 						  if (mysqli_num_rows($result) > 0) {
 							$row = mysqli_fetch_array($result);							                            							
 							$approve_withdrawal = $row["approve_withdrawal"];
-							echo number_format($approve_withdrawal);                 																  
+							echo number_format((float)($approve_withdrawal ?? 0));                 																  
 						  }
 						  else 
 						  {
@@ -342,7 +342,7 @@
 					?> 
 					<?php
 							$asila = $total_bet;
-						  echo number_format($total_bet, 2);
+						  echo number_format((float)($total_bet ?? 0), 2);
 					?>
 					</h4>
                 </div>				
@@ -369,7 +369,7 @@
 					?> 
 					<?php
 							$gala = $total_bet;
-						  echo number_format($total_bet, 2);
+						  echo number_format((float)($total_bet ?? 0), 2);
 					?>
 					</h4>
                 </div>				
