@@ -1,86 +1,83 @@
-<?php 
-	include "../../conn.php";
-	include "../../functions2.php";
-	
-	header('Content-Type: application/json; charset=utf-8');
-	header('Strict-Transport-Security: max-age=31536000');
-	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
-	header('Access-Control-Allow-Credentials: true');
-	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-	header('Access-Control-Allow-Origin: ' . $origin);
-	header('vary: Origin');
-	
-	date_default_timezone_set("Asia/Kolkata");
-	$shnunc = date("Y-m-d H:i:s");
-	$res = [
-		'code' => 11,
-		'msg' => 'Method not allowed',
-		'msgCode' => 12,
-		'serviceNowTime' => $shnunc,
-	];
-	$shonubody = file_get_contents("php://input");
-	$shonupost = json_decode($shonubody, true);
-	
-	if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-		if (isset($shonupost['language']) && isset($shonupost['random']) && isset($shonupost['signature']) && isset($shonupost['timestamp'])) {
-			$language = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['language']));
-			$random = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['random']));
-			$signature = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['signature']));
-			$userPhoto = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['userPhoto']));
-			$shonustr = '{"language":'.$language.',"random":"'.$random.'","userPhoto":"'.$userPhoto.'"}';
-			$shonusign = strtoupper(md5($shonustr));
-			if($shonusign == $signature){
-				$bearer = explode(" ", $_SERVER['HTTP_AUTHORIZATION']);
-				$author = $bearer[1];				
-				$is_jwt_valid = is_jwt_valid($author);
-				$data_auth = json_decode($is_jwt_valid, 1);
-				if($data_auth['status'] === 'Success') {
-					$sesquery = "SELECT akshinak
-					  FROM shonu_subjects
-					  WHERE akshinak = '$author'";
-					$sesresult=$conn->query($sesquery);
-					$sesnum = mysqli_num_rows($sesresult);
-					if($sesnum == 1){																				
-					
-						$res['code'] = 0;
-						$res['msg'] = 'Succeed';
-						$res['msgCode'] = 0;
-						http_response_code(200);
-						echo json_encode($res);	
-					}
-					else{
-						$res['code'] = 4;
-						$res['msg'] = 'No operation permission';
-						$res['msgCode'] = 2;
-						http_response_code(401);
-						echo json_encode($res);
-					}					
-				}
-				else{					
-					$res['code'] = 4;
-					$res['msg'] = 'No operation permission';
-					$res['msgCode'] = 2;
-					http_response_code(401);
-					echo json_encode($res);					
-				}
-			}
-			else{
-				$res['code'] = 5;
-				$res['msg'] = 'Wrong signature';
-				$res['msgCode'] = 3;
-				http_response_code(200);
-				echo json_encode($res);				
-			}
-		}
-		else{
-			$res['code'] = 7;
-			$res['msg'] = 'Param is Invalid';
-			$res['msgCode'] = 6;
-			http_response_code(200);
-			echo json_encode($res);			
-		}		
-	} else {		
-		http_response_code(405);
-		echo json_encode($res);
-	}
-?>
+<?php
+include "../../conn.php";
+include "../../functions2.php";
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
+header('Access-Control-Allow-Credentials: true');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '') {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Vary: Origin');
+
+function photo_response(array $payload, int $http = 200): void {
+    http_response_code($http);
+    echo json_encode($payload, JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    photo_response(['code' => 0, 'msg' => 'Succeed', 'msgCode' => 0]);
+}
+$body = json_decode(file_get_contents('php://input'), true) ?: [];
+$userPhoto = trim((string)($body['userPhoto'] ?? $body['avatarData'] ?? ''));
+if ($userPhoto === '') {
+    photo_response(['code' => 7, 'msg' => 'Param is Invalid', 'msgCode' => 6]);
+}
+
+$authorization = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+$parts = preg_split('/\s+/', $authorization);
+$token = (string)($parts[1] ?? ($parts[0] ?? ''));
+$jwt = json_decode($token === '' ? '{}' : is_jwt_valid($token), true);
+if (!is_array($jwt) || ($jwt['status'] ?? '') !== 'Success') {
+    photo_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+
+$stmt = $conn->prepare('SELECT id FROM shonu_subjects WHERE akshinak = ? LIMIT 1');
+$stmt->bind_param('s', $token);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if (!$user) {
+    photo_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+
+$storedPhoto = '';
+if (str_starts_with($userPhoto, 'data:image/')) {
+    if (strlen($userPhoto) > 2100000 || !preg_match('/^data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+\/=_-]+)$/i', $userPhoto, $matches)) {
+        photo_response(['code' => 7, 'msg' => 'Invalid image', 'msgCode' => 6]);
+    }
+    $binary = base64_decode($matches[2], true);
+    if ($binary === false || @getimagesizefromstring($binary) === false) {
+        photo_response(['code' => 7, 'msg' => 'Invalid image', 'msgCode' => 6]);
+    }
+    $mime = @getimagesizefromstring($binary)['mime'] ?? 'image/jpeg';
+    $storedPhoto = 'data:' . $mime . ';base64,' . base64_encode($binary);
+} else {
+    $allowed = [
+        '1' => '/assets/png/avatar1-2f23f3bd.png',
+        'avatar1' => '/assets/png/avatar1-2f23f3bd.png',
+        'avatar-1' => '/assets/png/avatar1-2f23f3bd.png',
+        '2' => '/assets/png/avatar-5a79e664.png',
+        '3' => '/assets/png/avatar-ea3b8ee9.png'
+    ];
+    $storedPhoto = $allowed[$userPhoto] ?? (str_starts_with($userPhoto, '/') ? $userPhoto : '');
+    if ($storedPhoto === '') {
+        photo_response(['code' => 7, 'msg' => 'Invalid image', 'msgCode' => 6]);
+    }
+}
+
+$create = "CREATE TABLE IF NOT EXISTS jalwa_user_profiles (
+    user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+    avatar_data MEDIUMTEXT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+if (!$conn->query($create)) {
+    photo_response(['code' => 9, 'msg' => 'Database error', 'msgCode' => 9], 500);
+}
+$save = $conn->prepare('INSERT INTO jalwa_user_profiles (user_id, avatar_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE avatar_data = VALUES(avatar_data)');
+$save->bind_param('is', $user['id'], $storedPhoto);
+$ok = $save->execute();
+$save->close();
+photo_response($ok ? ['code' => 0, 'msg' => 'Succeed', 'msgCode' => 0] : ['code' => 9, 'msg' => 'Unable to save image', 'msgCode' => 9], $ok ? 200 : 500);

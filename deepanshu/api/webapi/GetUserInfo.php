@@ -1,185 +1,149 @@
-<?php 
-	include "../../conn.php";
-	include "../../functions2.php";
-	
-	header('Content-Type: application/json; charset=utf-8');
-	header('Strict-Transport-Security: max-age=31536000');
-	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
-	header('Access-Control-Allow-Credentials: true');
-	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-	header('Access-Control-Allow-Origin: ' . $origin);
-	header('vary: Origin');
-	
-	date_default_timezone_set("Asia/Kolkata");
-	$shnunc = date("Y-m-d H:i:s");
-	$res = [
-		'code' => 11,
-		'msg' => 'Method not allowed',
-		'msgCode' => 12,
-		'serviceNowTime' => $shnunc,
-	];
-	$shonubody = file_get_contents("php://input");
-	$shonupost = json_decode($shonubody, true);
-	
-	if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-		if (isset($shonupost['language']) && isset($shonupost['random']) && isset($shonupost['signature']) && isset($shonupost['timestamp'])) {
-			$language = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['language']));
-			$random = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['random']));
-			$signature = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['signature']));
-			$shonustr = '{"language":'.$language.',"random":"'.$random.'"}';
-			$shonusign = strtoupper(md5($shonustr));
-			if($shonusign == $signature){
-				$bearer = explode(" ", $_SERVER['HTTP_AUTHORIZATION']);
-				$author = $bearer[1];				
-				$is_jwt_valid = is_jwt_valid($author);
-				$data_auth = json_decode($is_jwt_valid, 1);
-				if($data_auth['status'] === 'Success') {
-					$sesquery = "SELECT akshinak FROM shonu_subjects WHERE akshinak = '$author'";
-					$sesresult = $conn->query($sesquery);
-					$sesnum = mysqli_num_rows($sesresult);
-					if($sesnum == 1){
-					    $userId = $data_auth['payload']['id'];
-						$data['userId'] = (int)$data_auth['payload']['id'];
-						$data['userPhoto'] = '1';
-						$data['userName'] = '91'.$data_auth['payload']['mobile'];
-						$data['nickName'] = $data_auth['payload']['codechorkamukala'];
-						
-						$balquery = "SELECT motta FROM shonu_kaichila WHERE balakedara = ".$data_auth['payload']['id'];
-						$balresult = $conn->query($balquery);
-						$balarr = mysqli_fetch_array($balresult);
-						
-						$data['amount'] = $balarr['motta'];
-						
-                        $query = "SELECT rate FROM tbl_pg WHERE value = 'usdt' LIMIT 1";
-                        $result = $conn->query($query);
-                        $row = $result->fetch_assoc();
-                        $data['uRate'] = (float)$row['rate'];
-					 
-						$creaquery = "SELECT createdate, shonullgnt FROM shonu_subjects WHERE id = ".$data_auth['payload']['id'];
-						$crearesult = $conn->query($creaquery);
-						$creaarr = mysqli_fetch_array($crearesult);
-						$countQuery = "SELECT COUNT(*) AS total_notifications FROM notification WHERE user_id = ".$data_auth['payload']['id']." AND state = 0";
-                        $countResult = $conn->query($countQuery);
-                           if ($countResult) {
-                        $row = $countResult->fetch_assoc();
-                        $unRead = (int)$row['total_notifications'];
-                           }
-						$knbdstr = '{"userId":'.$data['userId'].',"userPhoto":"'.$data['userPhoto'].'","userName":'.$data['userName'].',"nickName":"'.$data['nickName'].'","createdate":"'.$creaarr['createdate'].'"}';
-						
-						$data['sign'] = strtoupper(hash('sha256', $knbdstr));
-						
-						$data['amountofCode'] = 0.00;
-						$data['isWithdraw'] = null;
-						$data['message'] = null;
-						$data['withdrawCount'] = 0;
-						
-						$data['addTime'] = '2024-04-17 14:10:50';
-						$data['userLoginDate'] = $creaarr['shonullgnt']; 
-						$data['startTime'] = null;
-						$data['endTime'] = null;
-						$data['fee'] = 0.0;
-						$data['unRead'] = $unRead;
-						$data['facebookAppID'] = null;
-						$data['googleAppID'] = null;
-						$data['twitterAppID'] = null;
-						$data['keyCode'] = null;
-						$data['trxRate'] = 10.0;
-						$data['uGold'] = 0.00;
-						$data['googleVerify'] = 0;
-						$data['isvalidator'] = 0;
-						$data['isRePwd'] = '1';
-						$data['integral'] = 0;
-						$data['isOpenPointMall'] = '0';
-						$data['isOpenAmountOfCode'] = '1';
-						$data['isOpenOfficialRechargeInputDialog'] = '0';
-						$data['isAllowUserAddUSDT'] = '1';
-						$data['isShowWalletTotalCT'] = '0';
-						$data['isShowRechargeBankList'] = '0';
-						$data['isPopupCommissionSwitch'] = '0';
-						
-						$data['groupDataShowAuth'][0]['id'] = 11;
-						$data['groupDataShowAuth'][0]['isShow'] = true;
-						$data['groupDataShowAuth'][1]['id'] = 12;
-						$data['groupDataShowAuth'][1]['isShow'] = true;
-						$data['groupDataShowAuth'][2]['id'] = 15;
-						$data['groupDataShowAuth'][2]['isShow'] = true;
-						$data['groupDataShowAuth'][3]['id'] = 16;
-						$data['groupDataShowAuth'][3]['isShow'] = true;
-						$data['groupDataShowAuth'][4]['id'] = 17;
-						$data['groupDataShowAuth'][4]['isShow'] = true;
-						$data['groupDataShowAuth'][5]['id'] = 18;
-						$data['groupDataShowAuth'][5]['isShow'] = true;
-						$data['groupDataShowAuth'][6]['id'] = 19;
-						$data['groupDataShowAuth'][6]['isShow'] = true;
-						$data['groupDataShowAuth'][7]['id'] = 20;
-						$data['groupDataShowAuth'][7]['isShow'] = true;
-						
-						$data['verifyMethods']['mobile'] = '91'.$data_auth['payload']['mobile'];
-						$data['verifyMethods']['email'] = '';
-						$data['verifyMethods']['google'] = '0';
-						
-						$data['regType'] = 1;
+<?php
+include "../../conn.php";
+include "../../functions2.php";
 
-						$data['userGroupAuth'][0] = '0';
-						$data['userGroupAuth'][1] = '1';
-						$data['userGroupAuth'][2] = '2';
-						$data['userGroupAuth'][3] = '3';
-						$data['userGroupAuth'][4] = '4';
-						$data['userGroupAuth'][5] = '5';
-						$data['userGroupAuth'][6] = '6';
-						$data['userGroupAuth'][7] = '7';
-						$data['userGroupAuth'][8] = '8';
-						$data['userGroupAuth'][9] = '9';
-						
-						$data['bindReward'] = 0.0;
-						$data['isGoogle'] = '0';
-						$data['isOpenChampion'] = '0';
-						$data['isAllowWithdraw'] = 1;
-						
-						$res['data'] = $data;
-						$res['code'] = 0;
-						$res['msg'] = 'Succeed';
-						$res['msgCode'] = 0;
-						http_response_code(200);
-						echo json_encode($res);					
-					}
-					else{
-						$res['code'] = 4;
-						$res['msg'] = 'No operation permission';
-						$res['msgCode'] = 2;
-						http_response_code(401);
-						echo json_encode($res);
-					}					
-				}
-				else{					
-					$res['code'] = 4;
-					$res['msg'] = 'No operation permission';
-					$res['msgCode'] = 2;
-					http_response_code(401);
-					echo json_encode($res);					
-				}
-			}
-			else{
-				$res['code'] = 5;
-				$res['msg'] = 'Wrong signature';
-				$res['msgCode'] = 3;
-				http_response_code(200);
-				echo json_encode($res);				
-			}
-		}
-		else{
-			$res['code'] = 7;
-			$res['msg'] = 'Param is Invalid';
-			$res['msgCode'] = 6;
-			http_response_code(200);
-			echo json_encode($res);			
-		}		
-	}
-	else{
-		$res['code'] = 11;
-		$res['msg'] = 'Method not allowed';
-		$res['msgCode'] = 12;
-		http_response_code(405);
-		echo json_encode($res);		
-	}
-?>
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
+header('Access-Control-Allow-Credentials: true');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '') {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+header('Vary: Origin');
+
+date_default_timezone_set('Asia/Kolkata');
+
+function user_info_response(array $payload, int $http = 200): void {
+    http_response_code($http);
+    echo json_encode($payload, JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    user_info_response(['code' => 0, 'msg' => 'Succeed', 'msgCode' => 0]);
+}
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    user_info_response(['code' => 11, 'msg' => 'Method not allowed', 'msgCode' => 12], 405);
+}
+
+$body = json_decode(file_get_contents('php://input'), true) ?: [];
+$language = (int)($body['language'] ?? 0);
+$random = (string)($body['random'] ?? '');
+$signature = strtoupper((string)($body['signature'] ?? ''));
+$expected = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '"}'));
+if ($signature !== '' && !hash_equals($expected, $signature)) {
+    user_info_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3]);
+}
+
+$authorization = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+$authParts = preg_split('/\s+/', $authorization);
+$token = (string)($authParts[1] ?? ($authParts[0] ?? ''));
+if ($token === '') {
+    user_info_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+$jwt = json_decode(is_jwt_valid($token), true);
+if (!is_array($jwt) || ($jwt['status'] ?? '') !== 'Success') {
+    user_info_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+
+$createProfiles = "CREATE TABLE IF NOT EXISTS jalwa_user_profiles (
+    user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+    avatar_data MEDIUMTEXT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+@mysqli_query($conn, $createProfiles);
+
+$stmt = $conn->prepare('SELECT id, mobile, owncode, codechorkamukala, createdate, shonullgnt FROM shonu_subjects WHERE akshinak = ? LIMIT 1');
+if (!$stmt) {
+    user_info_response(['code' => 9, 'msg' => 'Database error', 'msgCode' => 9], 500);
+}
+$stmt->bind_param('s', $token);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+if (!$user) {
+    user_info_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+
+$userId = (int)$user['id'];
+$wallet = 0.0;
+$walletStmt = $conn->prepare('SELECT motta FROM shonu_kaichila WHERE balakedara = ? LIMIT 1');
+if ($walletStmt) {
+    $walletStmt->bind_param('i', $userId);
+    $walletStmt->execute();
+    $walletRow = $walletStmt->get_result()->fetch_assoc();
+    $wallet = (float)($walletRow['motta'] ?? 0);
+    $walletStmt->close();
+}
+
+$avatar = '/assets/png/avatar1-2f23f3bd.png';
+$avatarStmt = $conn->prepare('SELECT avatar_data FROM jalwa_user_profiles WHERE user_id = ? LIMIT 1');
+if ($avatarStmt) {
+    $avatarStmt->bind_param('i', $userId);
+    $avatarStmt->execute();
+    $avatarRow = $avatarStmt->get_result()->fetch_assoc();
+    if (!empty($avatarRow['avatar_data'])) {
+        $avatar = (string)$avatarRow['avatar_data'];
+    }
+    $avatarStmt->close();
+}
+
+$uRate = 0.0;
+$rateResult = @mysqli_query($conn, "SELECT rate FROM tbl_pg WHERE value = 'usdt' LIMIT 1");
+if ($rateResult) {
+    $rateRow = mysqli_fetch_assoc($rateResult);
+    $uRate = (float)($rateRow['rate'] ?? 0);
+}
+
+$unread = 0;
+$noticeStmt = $conn->prepare('SELECT COUNT(*) AS total FROM notification WHERE user_id = ? AND state = 0');
+if ($noticeStmt) {
+    $noticeStmt->bind_param('i', $userId);
+    $noticeStmt->execute();
+    $noticeRow = $noticeStmt->get_result()->fetch_assoc();
+    $unread = (int)($noticeRow['total'] ?? 0);
+    $noticeStmt->close();
+}
+
+$nickname = (string)($user['codechorkamukala'] ?: ('Member' . $userId));
+$lastLogin = (string)($user['shonullgnt'] ?: $user['createdate']);
+$data = [
+    'userId' => $userId,
+    'uid' => $userId,
+    'ownCode' => (string)$user['owncode'],
+    'userPhoto' => $avatar,
+    'userName' => '91' . (string)$user['mobile'],
+    'nickName' => $nickname,
+    'amount' => $wallet,
+    'uRate' => $uRate,
+    'userLoginDate' => $lastLogin,
+    'vipLevel' => 0,
+    'sign' => strtoupper(hash('sha256', '{"userId":' . $userId . ',"userPhoto":"' . $avatar . '","userName":91' . $user['mobile'] . ',"nickName":"' . $nickname . '","createdate":"' . $user['createdate'] . '"}')),
+    'amountofCode' => 0.0,
+    'isWithdraw' => null,
+    'message' => null,
+    'withdrawCount' => 0,
+    'addTime' => $user['createdate'],
+    'startTime' => null,
+    'endTime' => null,
+    'fee' => 0.0,
+    'unRead' => $unread,
+    'verifyMethods' => ['mobile' => '91' . (string)$user['mobile'], 'email' => '', 'google' => '0'],
+    'regType' => 1,
+    'bindReward' => 0.0,
+    'isGoogle' => '0',
+    'isOpenChampion' => '0',
+    'isAllowWithdraw' => 1,
+    'isRePwd' => '1',
+    'integral' => 0,
+    'isOpenPointMall' => '0',
+    'isOpenAmountOfCode' => '1',
+    'isAllowUserAddUSDT' => '1',
+    'isShowWalletTotalCT' => '0',
+    'isShowRechargeBankList' => '0',
+    'isPopupCommissionSwitch' => '0',
+    'userGroupAuth' => ['0','1','2','3','4','5','6','7','8','9'],
+    'groupDataShowAuth' => array_map(fn($id) => ['id' => $id, 'isShow' => true], [11,12,15,16,17,18,19,20])
+];
+
+user_info_response(['data' => $data, 'code' => 0, 'msg' => 'Succeed', 'msgCode' => 0, 'serviceNowTime' => date('Y-m-d H:i:s')]);
