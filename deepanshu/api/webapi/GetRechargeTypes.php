@@ -42,7 +42,7 @@
 					$sesresult=$conn->query($sesquery);
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
-						$sites = 'http://jalwagams.buzz';
+						$sites = 'https://damaansource-production.up.railway.app';
 						
 						if ($payid == 2) {
                             $data["rechargetypelist"]["0"]["payTypeID"] = (int)"1023";

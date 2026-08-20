@@ -1,5 +1,5 @@
 window.CONFIG = Object.freeze({
-    "VITE_API_URL": "http://jalwagams.buzz/abcoders",
+    "VITE_API_URL": "https://damaansource-production.up.railway.app/abcoders",
     "VITE_BASE_LANGUAGE": "en",
     "VITE_BASE_DOLLARSIGN": "₹",
     "VITE_BASE_AREACODE": "+91",

@@ -6835,7 +6835,7 @@
                     s.append("paytm", this.userdetails.paytm),
                     U()
                       .post(
-                        "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=addbankcard&user=" +
+                        "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=addbankcard&user=" +
                           this.userdetails.username,
                         s
                       )
@@ -7655,7 +7655,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 L()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bankcard&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bankcard&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -7695,7 +7695,7 @@
                 s.append("code", this.userdetails.code),
                 L()
                   .post(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=addbankcard&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=addbankcard&user=" +
                       this.userdetails.username,
                     s
                   )
@@ -7726,7 +7726,7 @@
               1 == this.otpactive &&
                 ((document.getElementById("otpbtn").className = "gocode_time"),
                 L().get(
-                  "http://jalwagams.buzz/jet/trova/src/api/otp.php?num=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/otp.php?num=" +
                     this.userdetails.username
                 ),
                 this.pop("Success"),
@@ -9507,7 +9507,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 U()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bankcard&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bankcard&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -9524,7 +9524,7 @@
             deletecard() {
               (this.userdetails.username = localStorage.getItem("username")),
                 U().get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=deletebankcard&user=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=deletebankcard&user=" +
                     this.userdetails.username
                 ),
                 this.closedelete(),
@@ -10171,7 +10171,7 @@
               (this.username = localStorage.getItem("username")),
                 _()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=getcheckinstatus&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=getcheckinstatus&user=" +
                       this.username
                   )
                   .then((s) => {
@@ -10191,7 +10191,7 @@
             checkin() {
               _()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=checkinuser&user=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=checkinuser&user=" +
                     this.username
                 )
                 .then((s) => {
@@ -10686,7 +10686,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 E()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=withdrawrecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=withdrawrecord&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -10700,7 +10700,7 @@
                   }),
                 E()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -11483,7 +11483,7 @@
                   s.append("code", this.user.code),
                   j()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=reset",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=reset",
                       s
                     )
                     .then((s) => {
@@ -11520,7 +11520,7 @@
               null != this.user.username
                 ? 1 == this.otpactive &&
                   (j().get(
-                    "http://jalwagams.buzz/jet/trova/src/api/otp.php?num=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/otp.php?num=" +
                       this.user.username
                   ),
                   this.countDownTimer())
@@ -12039,7 +12039,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 T()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=invitereward&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=invitereward&user=" +
                       this.userdetails.username +
                       "&level=" +
                       this.userdetails.level
@@ -12437,7 +12437,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 g()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -12451,7 +12451,7 @@
                   }),
                 g()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -12840,7 +12840,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 W()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -12851,7 +12851,7 @@
                   }),
                 W()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=inviterecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=inviterecord&user=" +
                       this.userdetails.username +
                       "&level=" +
                       this.userdetails.level
@@ -13309,7 +13309,7 @@
                   s.append("password", this.user.password),
                   N()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/userapi.php?action=login",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/userapi.php?action=login",
                       s
                     )
                     .then((s) => {
@@ -14215,7 +14215,7 @@
                 ? null == this.change
                   ? (this.pop("Enter Your Name"), this.cancel())
                   : (P().get(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=changenickname&user=" +
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=changenickname&user=" +
                         this.userdetails.username +
                         "&nickname=" +
                         this.change
@@ -14226,7 +14226,7 @@
                   (null == this.change
                     ? (this.pop("Please Enter Password"), this.cancel())
                     : (P().get(
-                        "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=changepassword&user=" +
+                        "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=changepassword&user=" +
                           this.userdetails.username +
                           "&password=" +
                           this.change
@@ -14245,7 +14245,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 P()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -14384,7 +14384,7 @@
                       (0, a._)(
                         "div",
                         h,
-                        "http://jalwagams.buzz/jet//#/LR&RG?C=" +
+                        "https://damaansource-production.up.railway.app/jet//#/LR&RG?C=" +
                           (0, i.zw)(y.info.usercode),
                         1
                       ),
@@ -14443,7 +14443,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 f()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -16058,7 +16058,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 F()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -16072,7 +16072,7 @@
                   }),
                 F()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=invite&usercode=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=invite&usercode=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -16351,7 +16351,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 E()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -16365,7 +16365,7 @@
                   }),
                 E()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -17112,7 +17112,7 @@
               (this.username = localStorage.getItem("username")),
                 Z()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.username
                   )
                   .then((s) => {
@@ -17135,7 +17135,7 @@
                   "upi1"
                 ) {
                   var s =
-                      "http://jalwagams.buzz/jet/payment/wowpay.php?user=" +
+                      "https://damaansource-production.up.railway.app/jet/payment/wowpay.php?user=" +
                       this.username +
                       "&am=",
                     t = document.getElementById("recharge").value,
@@ -17146,7 +17146,7 @@
                   "upi2"
                 ) {
                   var s =
-                      "http://jalwagams.buzz/jet/payment/pay3.php?user=" +
+                      "https://damaansource-production.up.railway.app/jet/payment/pay3.php?user=" +
                       this.username +
                       "&am=",
                     t = document.getElementById("recharge").value,
@@ -17154,7 +17154,7 @@
                   window.open(e, "_blank");
                 } else {
                   var s =
-                      "http://jalwagams.buzz/jet/payment/pay4.php?user=" +
+                      "https://damaansource-production.up.railway.app/jet/payment/pay4.php?user=" +
                       this.username +
                       "&am=",
                     t = document.getElementById("recharge").value,
@@ -17425,7 +17425,7 @@
             getrec() {
               Z()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=resultrecord&server=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=resultrecord&server=" +
                     this.server
                 )
                 .then((s) => {
@@ -18428,7 +18428,7 @@
                   s.append("refcode", this.user.refcode),
                   j()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=register",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=register",
                       s
                     )
                     .then((s) => {
@@ -18465,7 +18465,7 @@
               null != this.user.username
                 ? 1 == this.otpactive &&
                   (j().get(
-                    "http://jalwagams.buzz/jet/trova/src/api/otp.php?num=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/otp.php?num=" +
                       this.user.username
                   ),
                   this.countDownTimer())
@@ -18851,7 +18851,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 g()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=rechargerecord&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -18865,7 +18865,7 @@
                   }),
                 g()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -19846,7 +19846,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 M()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=trans&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=trans&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -19860,7 +19860,7 @@
                   }),
                 M()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -19942,7 +19942,7 @@
               "button",
               {
                 "data-v-b74b9dc6": "",
-                onclick: "window.location.href='http://jalwagams.buzz/jet/tend'",
+                onclick: "window.location.href='https://damaansource-production.up.railway.app/jet/tend'",
               },
               "Trend"
             ),
@@ -21649,7 +21649,7 @@
             fechresultrec() {
               xt()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=resultrec&page=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=resultrec&page=" +
                     this.betbox.page
                 )
                 .then((s) => {
@@ -21661,7 +21661,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 xt()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.betbox.page1
@@ -21674,7 +21674,7 @@
                   }),
                 xt()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -21867,7 +21867,7 @@
                   s.append("ans", this.betbox.target),
                   xt()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet",
                       s
                     )
                     .then((s) => {
@@ -22185,7 +22185,7 @@
               (this.userdetails.username = localStorage.getItem("username")),
                 M()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=withdrawrecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=withdrawrecord&user=" +
                       this.userdetails.username +
                       "&page1=" +
                       this.userdetails.page
@@ -22199,7 +22199,7 @@
                   }),
                 M()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username
                   )
                   .then((s) => {
@@ -23060,7 +23060,7 @@
               (this.username = localStorage.getItem("username")),
                 J()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                       this.username
                   )
                   .then((s) => {
@@ -23072,7 +23072,7 @@
                   }),
                 J()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bankcard&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bankcard&user=" +
                       this.username
                   )
                   .then((s) => {
@@ -23103,7 +23103,7 @@
                   console.log(this.withdraw < this.bankcard.balance))
                 : J()
                     .get(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=withdrawal&user=" +
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=withdrawal&user=" +
                         this.username +
                         "&amount=" +
                         this.withdraw +
@@ -27005,7 +27005,7 @@
             fechresultrec() {
               Bl()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=AndharBahar"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=AndharBahar"
                 )
                 .then((s) => {
                   this.resultrec = s.data;
@@ -27016,7 +27016,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 Bl()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=AndharBahar"
                   )
@@ -27028,7 +27028,7 @@
                   }),
                 Bl()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=AndharBahar"
                   )
@@ -27196,7 +27196,7 @@
                 59 == t &&
                   Bl()
                     .get(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=AndharBahar"
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=AndharBahar"
                     )
                     .then((s) => {
                       (this.ani = s.data[s.data.length - 1].clo),
@@ -27225,7 +27225,7 @@
                   s.append("ans", this.userdetails.slide),
                   Bl()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=AndharBahar",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=AndharBahar",
                       s
                     )
                     .then((s) => {
@@ -27535,7 +27535,7 @@
               (this.username = localStorage.getItem("username")),
                 M()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=transrecord&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=transrecord&user=" +
                       this.username
                   )
                   .then((t) => {
@@ -31118,7 +31118,7 @@
             fechresultrec() {
               wl()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=Dice"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=Dice"
                 )
                 .then((s) => {
                   this.resultrec = s.data;
@@ -31129,7 +31129,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 wl()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=Dice"
                   )
@@ -31141,7 +31141,7 @@
                   }),
                 wl()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=Dice"
                   )
@@ -31275,7 +31275,7 @@
                   s.append("ans", this.userdetails.slide),
                   wl()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=Dice",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=Dice",
                       s
                     )
                     .then((s) => {
@@ -35886,7 +35886,7 @@
             fechresultrec() {
               un()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=FastParity"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=FastParity"
                 )
                 .then((s) => {
                   (this.resultrec = s.data), console.log(this.resultrec);
@@ -35897,7 +35897,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 un()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=FastParity"
                   )
@@ -35909,7 +35909,7 @@
                   }),
                 un()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=FastParity"
                   )
@@ -36112,7 +36112,7 @@
                   s.append("ans", this.betbox.target),
                   un()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=FastParity",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=FastParity",
                       s
                     )
                     .then((s) => {
@@ -63294,7 +63294,7 @@
           },
 		  beforeCreate: function () {
               if (localStorage.getItem("userInfo") === null) {
-				window.location.href = "http://jalwagams.buzz/#/login";
+				window.location.href = "https://damaansource-production.up.railway.app/#/login";
 			  }
             },
           created: function () {
@@ -63789,14 +63789,14 @@
                     (z = 200),
                     (Z = 45),
                     (N = 10),
-                    (v.src = "http://jalwagams.buzz/jet/sprite2.png"),
+                    (v.src = "https://damaansource-production.up.railway.app/jet/sprite2.png"),
                     (B = 40),
                     (D = 50))
                   : ((C = 71),
                     (z = 300),
                     (Z = 66),
                     (N = 15),
-                    (v.src = "http://jalwagams.buzz/jet/sprite3.png"),
+                    (v.src = "https://damaansource-production.up.railway.app/jet/sprite3.png"),
                     (B = 20),
                     (D = 150)),
                 (U = 70 * y),
@@ -64150,7 +64150,7 @@
               (this.username = (JSON.parse(localStorage.getItem('userInfo')).userName).substring(2)),
                 Ir()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.username
                   )
                   .then((s) => {
@@ -64163,7 +64163,7 @@
             fetchhistory() {
               Ir()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=crashgamedata&user=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=crashgamedata&user=" +
                     (JSON.parse(localStorage.getItem('userInfo')).userName).substring(2)
                 )
                 .then((s) => {
@@ -64176,7 +64176,7 @@
             fetchbets() {
               Ir()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                     this.username +
                     "&server=Crash"
                 )
@@ -64774,7 +64774,7 @@
               (this.username = localStorage.getItem("username")),
                 G()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.username +
                       "&server=" +
                       this.server
@@ -69435,7 +69435,7 @@
             fechresultrec() {
               dn()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=Parity"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=Parity"
                 )
                 .then((s) => {
                   (this.resultrec = s.data), console.log(this.resultrec);
@@ -69446,7 +69446,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 dn()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=Parity"
                   )
@@ -69458,7 +69458,7 @@
                   }),
                 dn()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=Parity"
                   )
@@ -69662,7 +69662,7 @@
                   s.append("ans", this.betbox.target),
                   dn()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=Parity",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=Parity",
                       s
                     )
                     .then((s) => {
@@ -74515,7 +74515,7 @@
             fechresultrec() {
               un()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=Sapre"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=Sapre"
                 )
                 .then((s) => {
                   (this.resultrec = s.data), console.log(this.resultrec);
@@ -74526,7 +74526,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 un()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=Sapre"
                   )
@@ -74538,7 +74538,7 @@
                   }),
                 un()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=Sapre"
                   )
@@ -74740,7 +74740,7 @@
                   s.append("ans", this.betbox.target),
                   un()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=Sapre",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=Sapre",
                       s
                     )
                     .then((s) => {
@@ -77766,7 +77766,7 @@
             start() {
               $a()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=Wheelocity"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=Wheelocity"
                 )
                 .then((s) => {
                   (this.ani = s.data[s.data.length - 1].ans),
@@ -77788,7 +77788,7 @@
             fechresultrec() {
               $a()
                 .get(
-                  "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=result&server=Wheelocity"
+                  "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=result&server=Wheelocity"
                 )
                 .then((s) => {
                   (this.resultrec = s.data), console.log(this.resultrec);
@@ -77799,7 +77799,7 @@
                 (this.userdetails.username = localStorage.getItem("username")),
                 $a()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=betrec&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=betrec&user=" +
                       this.userdetails.username +
                       "&server=Wheelocity"
                   )
@@ -77811,7 +77811,7 @@
                   }),
                 $a()
                   .get(
-                    "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=info&user=" +
+                    "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=info&user=" +
                       this.userdetails.username +
                       "&per=Wheelocity"
                   )
@@ -78012,7 +78012,7 @@
                   s.append("ans", this.betbox.target),
                   $a()
                     .post(
-                      "http://jalwagams.buzz/jet/trova/src/api/bet.php?action=bet&server=Wheelocity",
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/bet.php?action=bet&server=Wheelocity",
                       s
                     )
                     .then((s) => {

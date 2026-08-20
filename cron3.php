@@ -11,19 +11,19 @@ echo "Cron started at: " . date('Y-m-d H:i:s') . PHP_EOL;
 // Define tasks and their execution intervals
 $tasks = [
     [
-        'url' => 'https://jalwagams.buzz/niyamitakelasa_kemuru_drei.php',
+        'url' => 'https://damaansource-production.up.railway.app/niyamitakelasa_kemuru_drei.php',
         'interval' => '*/3 * * * *', // Every 3 minutes
     ],
     [
-        'url' => 'https://jalwagams.buzz/niyamitakelasa_aidudi_drei.php',
+        'url' => 'https://damaansource-production.up.railway.app/niyamitakelasa_aidudi_drei.php',
         'interval' => '*/3 * * * *', // Every 3 minutes
     ],
     [
-        'url' => 'https://jalwagams.buzz/niyamitakelasa_drei.php',
+        'url' => 'https://damaansource-production.up.railway.app/niyamitakelasa_drei.php',
         'interval' => '*/3 * * * *', // Every 3 minutes
     ],
     [
-        'url' => 'https://jalwagams.buzz/ktrx3.php',
+        'url' => 'https://damaansource-production.up.railway.app/ktrx3.php',
         'interval' => '*/3 * * * *', // Every 3 minutes
     ],
 ];

@@ -1,6 +1,6 @@
 <script>
 	if (!localStorage.getItem('userInfo')) {
-		window.location.href = 'http://jalwagams.buzz/#/login';
+		window.location.href = 'https://damaansource-production.up.railway.app/#/login';
 	}
 	else{
 		let alldet = localStorage.getItem('userInfo');
@@ -18,7 +18,7 @@
 		.then(response => response.json())
 		.then(data => {
 			if(data.res != '1'){
-				window.location.href = 'http://jalwagams.buzz/';
+				window.location.href = 'https://damaansource-production.up.railway.app/';
 			}
 			else{
 				let date = new Date();
@@ -28,7 +28,7 @@
 			}
 		})
 		.catch(error => {
-			window.location.href = 'http://jalwagams.buzz/';
+			window.location.href = 'https://damaansource-production.up.railway.app/';
 		});
 	}
 </script>

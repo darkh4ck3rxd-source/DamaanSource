@@ -33,10 +33,10 @@
 				$data['isSplitLocalEWallet'] = true;
 				$data['jackportMaxReswadAmount'] = 500;
 				$data['projectName'] = 'jalwagameslogin';
-				$data['projectLogo'] = 'http://jalwagams.buzz/logo.png';
+				$data['projectLogo'] = 'https://damaansource-production.up.railway.app/logo.png';
 				$data['languages'] = 'en|hd';
 				$data['webIco'] = 'https://winingbazzar.com/Jalwa/other/h5setting_20250311160357hftw.png';
-				$data['headLogo'] = 'http://jalwagams.buzz/wlogo.png';
+				$data['headLogo'] = 'https://damaansource-production.up.railway.app/wlogo.png';
 				$data['dollarSign'] = '₹';
 				$data['upperOrLower'] = '0';
 				$data['defaultCurrentLanguage'] = 'en';

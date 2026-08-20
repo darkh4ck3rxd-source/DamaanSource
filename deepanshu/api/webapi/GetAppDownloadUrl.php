@@ -27,7 +27,7 @@
 			$shonustr = '{"language":'.$language.',"random":"'.$random.'"}';
 			$shonusign = strtoupper(md5($shonustr));
 			if($shonusign == $signature){				
-				$data['androidUrl'] = 'https://jalwagams.buzz/jalwagams.apk';
+				$data['androidUrl'] = 'https://damaansource-production.up.railway.app/jalwagams.apk';
 				$data['iosUrl'] = '';
 				$data['isAppForceUpdate'] = 0;	
 				$data['latestAndroidShellVersion'] = 0;

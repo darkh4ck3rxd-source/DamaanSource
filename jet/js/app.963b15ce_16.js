@@ -958,7 +958,7 @@
             },
             beforeCreate: function () {
               if (localStorage.getItem("userInfo") === null) {
-				window.location.href = "http://jalwagams.buzz/#/login";
+				window.location.href = "https://damaansource-production.up.railway.app/#/login";
 			  }
             },
             created: function () {
@@ -992,7 +992,7 @@
                 (this.username = (JSON.parse(localStorage.getItem('userInfo')).mobile).substring(2)),
                   O()
                     .get(
-                      "http://jalwagams.buzz/jet/trova/src/api/me.php?action=getuserinfo&user=" +
+                      "https://damaansource-production.up.railway.app/jet/trova/src/api/me.php?action=getuserinfo&user=" +
                         this.username
                     )
                     .then((e) => {
