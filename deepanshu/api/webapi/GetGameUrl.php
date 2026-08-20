@@ -23,6 +23,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
 $gameCode = trim((string)($body['gameCode'] ?? ''));
 $vendorCode = trim((string)($body['vendorCode'] ?? ''));
+$language = (string)($body['language'] ?? '');
+$phonetype = (string)($body['phonetype'] ?? '');
+$random = (string)($body['random'] ?? '');
+$signature = strtoupper(trim((string)($body['signature'] ?? '')));
+if ($gameCode === '' || $vendorCode === '' || $language === '' || $phonetype === '' || $random === '' || $signature === '' || !isset($body['timestamp'])) {
+    game_response(['code' => 7, 'msg' => 'Param is Invalid', 'msgCode' => 6], 200);
+}
+$signatureString = '{"gameCode":"' . $gameCode . '","language":' . $language . ',"phonetype":' . $phonetype . ',"random":"' . $random . '","vendorCode":' . $vendorCode . '}';
+$expectedSignature = strtoupper(md5($signatureString));
+if (!hash_equals($expectedSignature, $signature)) {
+    game_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3], 200);
+}
 $authorization = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
 $parts = preg_split('/\s+/', $authorization);
 $token = (string)($parts[1] ?? ($parts[0] ?? ''));
