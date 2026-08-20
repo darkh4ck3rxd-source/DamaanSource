@@ -22,5 +22,3 @@ if (!mysqli_real_connect($conn, $dbServer, $dbUser, $dbPassword, $dbName, $dbPor
 }
 
 mysqli_set_charset($conn, 'utf8mb4');
-?>
-
