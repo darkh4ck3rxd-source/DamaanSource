@@ -2,10 +2,10 @@
 	
 	// Database connection info 
 	$dbDetails = array( 
-		'host' => 'localhost', 
-		'user' => 'winningb_paisa', 
-		'pass' => 'winningb_paisa', 
-		'db'   => 'winningb_paisa' 
+		'host' => (getenv('MYSQLHOST') ?: 'switchback.proxy.rlwy.net'), 
+		'user' => (getenv('MYSQLUSER') ?: 'root'), 
+		'pass' => (getenv('MYSQLPASSWORD') ?: ''), 
+		'db'   => (getenv('MYSQLDATABASE') ?: 'railway'), 'port' => (int)(getenv('MYSQLPORT') ?: 3306) 
 	); 
 	 
 	// DB table to use 
