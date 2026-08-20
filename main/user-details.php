@@ -314,7 +314,8 @@
 										?>
 									</td>
 									<td>
-										<a href="user-details.php?user=<?= $item['id']; ?>"  target="_blank" class="update-person" style="background-color: darkorange; color:white; font-size:12px; padding: 5px;" title="User Detail">User Detail</a>
+										<a href="user-details.php?user=<?= (int)$item['id']; ?>" target="_blank" class="update-person" style="background-color: darkorange; color:white; font-size:12px; padding: 5px;" title="User Detail">User Detail</a>
+										<a href="edit_subordinate.php?parent=<?= (int)$userid; ?>&user=<?= (int)$item['id']; ?>" target="_blank" class="update-person" style="background-color: #2563eb; color:white; font-size:12px; padding: 5px; margin-left:4px;" title="Edit Subordinate">Edit</a>
 									</td>                                                                                                                       													
 								</tr>
 						<?php 

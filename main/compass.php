@@ -219,6 +219,9 @@
                 <li class="nav-item"> <a class="nav-link" href="banners.php">Banner Manager</a></li>
               </ul>
               <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="manage_agent_users.php">Subordinates</a></li>
+              </ul>
+              <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="manage_salary.php">Daily Salary</a></li>
               </ul>
 			  <ul class="nav flex-column sub-menu">
