@@ -22,25 +22,23 @@ async function importDatabase() {
 
     try {
         const connection = await mysql.createConnection(config);
-        
-        // Check if users table already exists
-        const [rows] = await connection.query("SHOW TABLES LIKE 'users'");
-        if (rows.length > 0) {
-            console.log('✅ Database already imported. Skipping import.');
-            await connection.end();
-            process.exit(0);
-        }
-
         console.log('Reading db.sql...');
         const sql = fs.readFileSync(path.join(__dirname, 'db.sql'), 'utf8');
 
         console.log('Importing data (this may take a minute)...');
-        await connection.query(sql);
-        console.log('✅ Database imported successfully!');
+        try {
+            await connection.query(sql);
+            console.log('✅ Database imported successfully!');
+        } catch (err) {
+            if (err.code === 'ER_TABLE_EXISTS_ERROR' || err.errno === 1050 || err.message.includes('already exists')) {
+                console.log('✅ Tables already exist. Skipping import.');
+            } else {
+                console.error('⚠️ Import warning:', err.message);
+            }
+        }
         await connection.end();
     } catch (err) {
-        console.error('⚠️ Notice during import (continuing startup):', err.message);
-        process.exit(0); // Exit with 0 so server startup proceeds
+        console.error('❌ Connection Error:', err.message);
     }
 }
 
