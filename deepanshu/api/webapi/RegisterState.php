@@ -27,8 +27,9 @@
 			$shonustr = '{"language":'.$language.',"random":"'.$random.'"}';
 			$shonusign = strtoupper(md5($shonustr));
 			if($shonusign == $signature){				
-				$data['isOpenRegisterSMS'] = '0';
-				$data['isOpenRegisterEmail'] = '1';
+$data['registerState'] = '1';
+					$data['isOpenRegisterSMS'] = '0';
+					$data['isOpenRegisterEmail'] = '1';
 				$data['registerEmailState'] = '0';	
 				$data['registerMobileState'] = '1';
 				$data['registerStateMsg'] = null;
