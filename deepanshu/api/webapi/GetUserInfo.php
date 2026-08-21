@@ -94,6 +94,16 @@ if ($avatarStmt) {
     $avatarStmt->close();
 }
 
+$currentVipLevel = 0;
+$vipLevelStmt = @$conn->prepare('SELECT lvl FROM vip WHERE userid = ? LIMIT 1');
+if ($vipLevelStmt) {
+    $vipLevelStmt->bind_param('i', $userId);
+    $vipLevelStmt->execute();
+    $vipLevelRow = $vipLevelStmt->get_result()->fetch_assoc();
+    $currentVipLevel = (int)($vipLevelRow['lvl'] ?? 0);
+    $vipLevelStmt->close();
+}
+
 $uRate = 0.0;
 $rateResult = @mysqli_query($conn, "SELECT rate FROM tbl_pg WHERE value = 'usdt' LIMIT 1");
 if ($rateResult) {
@@ -123,7 +133,7 @@ $data = [
     'amount' => $wallet,
     'uRate' => $uRate,
     'userLoginDate' => $lastLogin,
-    'vipLevel' => 0,
+    'vipLevel' => $currentVipLevel,
     'sign' => strtoupper(hash('sha256', '{"userId":' . $userId . ',"userPhoto":"' . $avatar . '","userName":91' . $user['mobile'] . ',"nickName":"' . $nickname . '","createdate":"' . $user['createdate'] . '"}')),
     'amountofCode' => 0.0,
     'isWithdraw' => null,

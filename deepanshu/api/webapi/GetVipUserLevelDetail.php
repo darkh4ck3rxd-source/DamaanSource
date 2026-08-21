@@ -1,172 +1,76 @@
-<?php 
-	include "../../conn.php";
-	include "../../functions2.php";
-	
-	header('Content-Type: application/json; charset=utf-8');
-	header('Strict-Transport-Security: max-age=31536000');
-	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
-	header('Access-Control-Allow-Credentials: true');
-	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-	header('Access-Control-Allow-Origin: ' . $origin);
-	header('vary: Origin');
-	
-	date_default_timezone_set("Asia/Kolkata");
-	$shnunc = date("Y-m-d H:i:s");
-	$res = [
-		'code' => 11,
-		'msg' => 'Method not allowed',
-		'msgCode' => 12,
-		'serviceNowTime' => $shnunc,
-	];
-	$shonubody = file_get_contents("php://input");
-	$shonupost = json_decode($shonubody, true);
-	
-	if ($_SERVER['REQUEST_METHOD'] != 'GET') {
-		if (isset($shonupost['language']) && isset($shonupost['random']) && isset($shonupost['signature']) && isset($shonupost['timestamp'])) {
-			$language = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['language']));
-			$random = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['random']));
-			$signature = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['signature']));
-			$shonustr = '{"language":'.$language.',"random":"'.$random.'"}';
-			$shonusign = strtoupper(md5($shonustr));
-			if($shonusign == $signature){
-				$bearer = explode(" ", $_SERVER['HTTP_AUTHORIZATION']);
-				$author = $bearer[1];				
-				$is_jwt_valid = is_jwt_valid($author);
-				$data_auth = json_decode($is_jwt_valid, 1);
-				if($data_auth['status'] === 'Success') {
-					$sesquery = "SELECT akshinak
-					  FROM shonu_subjects
-					  WHERE akshinak = '$author'";
-					$sesresult=$conn->query($sesquery);
-					$sesnum = mysqli_num_rows($sesresult);
-					if($sesnum == 1){
-						$vipquery = "SELECT expe, lvl
-						  FROM vip
-						  WHERE userid = ".$data_auth['payload']['id'];
-						$vipresult = $conn->query($vipquery);
-						$viparr = mysqli_fetch_array($vipresult);
-						
-						$data[0]['id'] = 1;
-						$data[0]['vipName'] = 'VIP1';
-						$data[0]['status'] = 1;
-						$data[0]['currentExp'] = (int)$viparr['expe'];
-						$data[0]['upgrade'] = 3000;
-						$data[0]['relegationExp'] = (int)$viparr['expe'];
-						$data[0]['relegation'] = 1000;
-						$data[0]['deductExp'] = 1500;
-						$data[0]['amount'] = 1;
-						if($viparr['lvl'] >= 1){
-							$data[0]['upgradeStatus'] = 1;
-						}
-						else{
-							$data[0]['upgradeStatus'] = 0;
-						}						
-						
-						$data[1]['id'] = 2;
-						$data[1]['vipName'] = 'VIP2';
-						$data[1]['status'] = 1;
-						$data[1]['currentExp'] = (int)$viparr['expe'];
-						$data[1]['upgrade'] = 30000;
-						$data[1]['relegationExp'] = (int)$viparr['expe'];
-						$data[1]['relegation'] = 10000;
-						$data[1]['deductExp'] = 15000;
-						$data[1]['amount'] = 1;
-						if($viparr['lvl'] >= 2){
-							$data[1]['upgradeStatus'] = 1;
-						}
-						else{
-							$data[1]['upgradeStatus'] = 0;
-						}	
-						
-						$data[2]['id'] = 3;
-						$data[2]['vipName'] = 'VIP3';
-						$data[2]['status'] = 1;
-						$data[2]['currentExp'] = (int)$viparr['expe'];
-						$data[2]['upgrade'] = 400000;
-						$data[2]['relegationExp'] = (int)$viparr['expe'];
-						$data[2]['relegation'] = 100000;
-						$data[2]['deductExp'] = 200000;
-						$data[2]['amount'] = 1;
-						if($viparr['lvl'] >= 3){
-							$data[2]['upgradeStatus'] = 1;
-						}
-						else{
-							$data[2]['upgradeStatus'] = 0;
-						}	
-						
-						$data[3]['id'] = 4;
-						$data[3]['vipName'] = 'VIP4';
-						$data[3]['status'] = 1;
-						$data[3]['currentExp'] = (int)$viparr['expe'];
-						$data[3]['upgrade'] = 4000000;
-						$data[3]['relegationExp'] = (int)$viparr['expe'];
-						$data[3]['relegation'] = 1000000;
-						$data[3]['deductExp'] = 2000000;
-						$data[3]['amount'] = 1;
-						if($viparr['lvl'] >= 4){
-							$data[3]['upgradeStatus'] = 1;
-						}
-						else{
-							$data[3]['upgradeStatus'] = 0;
-						}	
-						
-						$data[4]['id'] = 5;
-						$data[4]['vipName'] = 'VIP5';
-						$data[4]['status'] = 1;
-						$data[4]['currentExp'] = (int)$viparr['expe'];
-						$data[4]['upgrade'] = 20000000;
-						$data[4]['relegationExp'] = (int)$viparr['expe'];
-						$data[4]['relegation'] = 10000000;
-						$data[4]['deductExp'] = 10000000;
-						$data[4]['amount'] = 1;
-						if($viparr['lvl'] >= 5){
-							$data[4]['upgradeStatus'] = 1;
-						}
-						else{
-							$data[4]['upgradeStatus'] = 0;
-						}	
-										
-						
-						$res['data'] = $data;
-						$res['code'] = 0;
-						$res['msg'] = 'Succeed';
-						$res['msgCode'] = 0;
-						http_response_code(200);
-						echo json_encode($res);	
-					}
-					else{
-						$res['code'] = 4;
-						$res['msg'] = 'No operation permission';
-						$res['msgCode'] = 2;
-						http_response_code(401);
-						echo json_encode($res);
-					}					
-				}
-				else{					
-					$res['code'] = 4;
-					$res['msg'] = 'No operation permission';
-					$res['msgCode'] = 2;
-					http_response_code(401);
-					echo json_encode($res);					
-				}
-			}
-			else{
-				$res['code'] = 5;
-				$res['msg'] = 'Wrong signature';
-				$res['msgCode'] = 3;
-				http_response_code(200);
-				echo json_encode($res);				
-			}
-		}
-		else{
-			$res['code'] = 7;
-			$res['msg'] = 'Param is Invalid';
-			$res['msgCode'] = 6;
-			http_response_code(200);
-			echo json_encode($res);			
-		}		
-	} else {		
-		http_response_code(405);
-		echo json_encode($res);
-	}
-?>
+<?php
+include "../../conn.php";
+include "../../functions2.php";
+
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
+header('Access-Control-Allow-Credentials: true');
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin !== '') header('Access-Control-Allow-Origin: ' . $origin);
+header('Vary: Origin');
+
+date_default_timezone_set('Asia/Kolkata');
+function vip_response(array $payload, int $http = 200): void {
+    http_response_code($http);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') vip_response(['code' => 0, 'msg' => 'Succeed', 'msgCode' => 0]);
+if ($_SERVER['REQUEST_METHOD'] === 'GET') vip_response(['code' => 11, 'msg' => 'Method not allowed', 'msgCode' => 12], 405);
+
+$body = json_decode(file_get_contents('php://input'), true) ?: [];
+$language = (int)($body['language'] ?? 0);
+$random = (string)($body['random'] ?? '');
+$signature = strtoupper((string)($body['signature'] ?? ''));
+$expected = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '"}'));
+if ($signature === '' || !hash_equals($expected, $signature)) {
+    vip_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3]);
+}
+
+$authorization = trim((string)($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+$parts = preg_split('/\s+/', $authorization);
+$token = (string)($parts[1] ?? ($parts[0] ?? ''));
+$jwt = json_decode($token === '' ? '{}' : is_jwt_valid($token), true);
+$userId = (int)($jwt['payload']['id'] ?? 0);
+if (!is_array($jwt) || ($jwt['status'] ?? '') !== 'Success' || $userId <= 0) {
+    vip_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+}
+$userStmt = $conn->prepare('SELECT id FROM shonu_subjects WHERE id = ? AND status = 1 LIMIT 1');
+if (!$userStmt) vip_response(['code' => 9, 'msg' => 'Database error', 'msgCode' => 9], 500);
+$userStmt->bind_param('i', $userId);
+$userStmt->execute();
+$user = $userStmt->get_result()->fetch_assoc();
+$userStmt->close();
+if (!$user) vip_response(['code' => 4, 'msg' => 'No operation permission', 'msgCode' => 2], 401);
+
+$currentExp = 0;
+$currentLevel = 0;
+$vipStmt = @$conn->prepare('SELECT expe, lvl FROM vip WHERE userid = ? LIMIT 1');
+if ($vipStmt) {
+    $vipStmt->bind_param('i', $userId);
+    $vipStmt->execute();
+    $vipRow = $vipStmt->get_result()->fetch_assoc();
+    $currentExp = (int)($vipRow['expe'] ?? 0);
+    $currentLevel = (int)($vipRow['lvl'] ?? 0);
+    $vipStmt->close();
+}
+
+$thresholds = [3000, 30000, 400000, 4000000, 20000000, 100000000, 500000000, 1000000000, 2000000000, 5000000000];
+$data = [];
+foreach ($thresholds as $index => $upgrade) {
+    $id = $index + 1;
+    $previous = $index === 0 ? 0 : $thresholds[$index - 1];
+    $data[] = [
+        'id' => $id,
+        'vipName' => 'VIP' . $id,
+        'status' => 1,
+        'currentExp' => $currentExp,
+        'upgrade' => $upgrade,
+        'relegationExp' => $currentExp,
+        'relegation' => $previous,
+        'deductExp' => (int)floor($upgrade / 2),
+        'amount' => 1,
+        'upgradeStatus' => $currentLevel >= $id ? 1 : 0
+    ];
+}
+vip_response(['data' => $data, 'code' => 0, 'msg' => 'Succeed', 'msgCode' => 0, 'serviceNowTime' => date('Y-m-d H:i:s')]);
