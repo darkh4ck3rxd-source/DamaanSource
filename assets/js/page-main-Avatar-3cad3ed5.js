@@ -1,3 +1,4 @@
+import{U as defineComponent,r as ref,$ as useRouter,Z as h}from"./common.modules-219f1756.js";
 const avatarChoices=[
   "/assets/png/jalwa-avatar-01.png",
   "/assets/png/jalwa-avatar-02.png",
