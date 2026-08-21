@@ -147,8 +147,13 @@ $data["withdrawalsrule"]["withdrawRemainingCount"] = $shelly_1;
 $data["withdrawalsrule"]["startTime"] = "00:00";
 $data["withdrawalsrule"]["endTime"] = "23:59";
 $data["withdrawalsrule"]["fee"] = (int)"0";
-$data["withdrawalsrule"]["minPrice"] = (int)"110";
-$data["withdrawalsrule"]["maxPrice"] = (int)"50000";
+if ((int)$withdrawid === 3) {
+    $data["withdrawalsrule"]["minPrice"] = 1000;
+    $data["withdrawalsrule"]["maxPrice"] = 1000000;
+} else {
+    $data["withdrawalsrule"]["minPrice"] = 110;
+    $data["withdrawalsrule"]["maxPrice"] = 50000;
+}
 
 // Query to fetch withdrawal amount
 $balquery = "SELECT motta

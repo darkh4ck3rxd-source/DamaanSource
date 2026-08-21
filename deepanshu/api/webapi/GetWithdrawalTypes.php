@@ -40,17 +40,26 @@
 					$sesresult=$conn->query($sesquery);
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
-						$data['withdrawlist'][0]['withdrawID'] = 1;
-						$data['withdrawlist'][0]['name'] = 'BANK CARD';
-						$data['withdrawlist'][0]['isAdd'] = 0;
-						$data['withdrawlist'][0]['withBeforeImgUrl'] = 'https://ossimg.bdg123456.com/BDGWin/payNameIcon/WithBeforeImgIcon_202403161624569ini.png';
-						$data['withdrawlist'][0]['withAfterImgUrl'] = 'https://ossimg.bdg123456.com/BDGWin/payNameIcon/WithBeforeImgIcon2_20240316162456if4s.png';
-						
-						$data['withdrawlist'][1]['withdrawID'] = 3;
-						$data['withdrawlist'][1]['name'] = 'USDT';
-						$data['withdrawlist'][1]['isAdd'] = 0;
-						$data['withdrawlist'][1]['withBeforeImgUrl'] = 'https://ossimg.bdg123456.com/BDGWin/payNameIcon/WithBeforeImgIcon_20240323183235bhef.png';
-						$data['withdrawlist'][1]['withAfterImgUrl'] = 'https://ossimg.bdg123456.com/BDGWin/payNameIcon/WithBeforeImgIcon2_20240323183236ntpr.png';
+$data['withdrawlist'][0]['withdrawID'] = 1;
+							$data['withdrawlist'][0]['optionKey'] = 'upi';
+							$data['withdrawlist'][0]['name'] = 'UPI';
+							$data['withdrawlist'][0]['isAdd'] = 0;
+							$data['withdrawlist'][0]['withBeforeImgUrl'] = '/assets/png/upi-withdraw.png';
+							$data['withdrawlist'][0]['withAfterImgUrl'] = '/assets/png/upi-withdraw.png';
+
+							$data['withdrawlist'][1]['withdrawID'] = 1;
+							$data['withdrawlist'][1]['optionKey'] = 'bank';
+							$data['withdrawlist'][1]['name'] = 'BANK CARD';
+							$data['withdrawlist'][1]['isAdd'] = 0;
+							$data['withdrawlist'][1]['withBeforeImgUrl'] = '/assets/png/bank-card-withdraw.png';
+							$data['withdrawlist'][1]['withAfterImgUrl'] = '/assets/png/bank-card-withdraw.png';
+
+							$data['withdrawlist'][2]['withdrawID'] = 3;
+							$data['withdrawlist'][2]['optionKey'] = 'usdt';
+							$data['withdrawlist'][2]['name'] = 'USDT';
+							$data['withdrawlist'][2]['isAdd'] = 0;
+							$data['withdrawlist'][2]['withBeforeImgUrl'] = '/assets/png/usdt-withdraw.png';
+							$data['withdrawlist'][2]['withAfterImgUrl'] = '/assets/png/usdt-withdraw.png';
 												
 						$res['data'] = $data;
 						$res['code'] = 0;
