@@ -113,8 +113,11 @@
                 <li class="nav-item"> <a class="nav-link" href="addupiimg.php">Add Upi Image</a></li>
               </ul>			  
 			  <ul class="nav flex-column sub-menu">
-               <li class="nav-item"> <a class="nav-link" href="addimgusdt_2.php">Add Usdt Image</a></li>
-              </ul>
+					<li class="nav-item"> <a class="nav-link" href="addimgusdt_2.php">Add Usdt Image</a></li>
+			  </ul>
+			  <ul class="nav flex-column sub-menu">
+					<li class="nav-item"> <a class="nav-link" href="payment_settings.php">Payment QR Settings</a></li>
+			  </ul>
 			  <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="deposit_update.php">Deposit Update</a></li>
               </ul>

@@ -453,6 +453,17 @@
 								'sort' => 90000,
 							];
 						}
+						// Route all UPI-like channels to the configurable UPI QR page and
+						// the USDT channel to the configurable USDT QR page. The dummy
+						// tyid keeps the existing frontend query builder on its ampersand
+						// branch instead of producing two question marks.
+						$qrMethod = ($payid === 11) ? 'usdt' : 'upi';
+						if (!empty($data['rechargetypelist']) && is_array($data['rechargetypelist'])) {
+							foreach ($data['rechargetypelist'] as &$rechargeType) {
+								$rechargeType['paySendUrl'] = $sites . '/pay/qrpay.php?method=' . $qrMethod . '&tyid=0';
+							}
+							unset($rechargeType);
+						}
 						$data['banklist'] = null;
 						$data['localUsdtlist'] = null;
 						$data['thirdPayBankList'] = null;
