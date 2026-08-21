@@ -14,7 +14,7 @@ $jsonData = '{
             "categoryName": "彩票",
             "state": 1,
             "sort": 10,
-            "categoryImg": "/assets/png/iconLottery-e1521a51.png"
+            "categoryImg": "/assets/png/jalwa-lottery-billiards.png"
         },
         {
             "id": 8,
