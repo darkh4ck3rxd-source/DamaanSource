@@ -55,9 +55,10 @@
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
 						$shonuid = $data_auth['payload']['id'];
-						if($withdrawid == 1){
+						$accountCondition = ((int)$withdrawid === 2) ? "khatehesaru = 'UPI'" : "khatehesaru != 'TRC' AND khatehesaru != 'UPI'";
+						if($withdrawid == 1 || $withdrawid == 2){
 							$samasye = "SELECT phalanubhavi
-							  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru != 'TRC'
+							  FROM khate WHERE byabaharkarta = $shonuid AND $accountCondition
 							  ORDER BY shonu DESC LIMIT 1";
 							$samasyephalitansa = $conn->query($samasye);
 							$samasyephalitansa_dhadi = mysqli_num_rows($samasyephalitansa);	
@@ -66,7 +67,7 @@
 								$data['lastBandCarkName'] = $samasyephalitansa_sreni['phalanubhavi'];
 								
 								$samasye = "SELECT shonu, khatehesaru, khatesankhye, kod, duravani
-								  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru != 'TRC'
+								  FROM khate WHERE byabaharkarta = $shonuid AND $accountCondition
 								  ORDER BY shonu DESC";
 								$samasyephalitansa = $conn->query($samasye);
 								$i = 0;
@@ -136,7 +137,7 @@ $samasyephalitansa_1 = $conn->query($samasye_1);
 $shelly = mysqli_num_rows($samasyephalitansa_1);
 if ($withdrawid == 3) {
     $shelly_1 = 5 - $shelly;
-} elseif ($withdrawid == 1) {
+} elseif ($withdrawid == 1 || $withdrawid == 2) {
     $shelly_1 = 3 - $shelly;
 }
 
@@ -147,8 +148,13 @@ $data["withdrawalsrule"]["withdrawRemainingCount"] = $shelly_1;
 $data["withdrawalsrule"]["startTime"] = "00:00";
 $data["withdrawalsrule"]["endTime"] = "23:59";
 $data["withdrawalsrule"]["fee"] = (int)"0";
-$data["withdrawalsrule"]["minPrice"] = (int)"110";
-$data["withdrawalsrule"]["maxPrice"] = (int)"50000";
+if ((int)$withdrawid === 3) {
+    $data["withdrawalsrule"]["minPrice"] = 1000;
+    $data["withdrawalsrule"]["maxPrice"] = 1000000;
+} else {
+    $data["withdrawalsrule"]["minPrice"] = 110;
+    $data["withdrawalsrule"]["maxPrice"] = 50000;
+}
 
 // Query to fetch withdrawal amount
 $balquery = "SELECT motta

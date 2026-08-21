@@ -40,7 +40,7 @@
 					$sesresult=$conn->query($sesquery);
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
-$data['withdrawlist'][0]['withdrawID'] = 1;
+$data['withdrawlist'][0]['withdrawID'] = 2;
 							$data['withdrawlist'][0]['optionKey'] = 'upi';
 							$data['withdrawlist'][0]['name'] = 'UPI';
 							$data['withdrawlist'][0]['isAdd'] = 0;
