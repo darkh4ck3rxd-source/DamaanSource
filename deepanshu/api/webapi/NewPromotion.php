@@ -175,9 +175,27 @@
 						$rbxresult = $conn->query($rbxquery);
 						$rbxar = mysqli_fetch_array($rbxresult);
 						$sumayoga = (float)$rbxar['sumayoga'];
-						$sumayoga == null ? $data['children_Lv_RebateAmount'] = 0 : $data['children_Lv_RebateAmount'] = number_format($sumayoga, 2, '.', '');
-						
-						$res['data'] = $data;
+							$sumayoga == null ? $data['children_Lv_RebateAmount'] = 0 : $data['children_Lv_RebateAmount'] = number_format($sumayoga, 2, '.', '');
+
+                            // Apply admin-managed Agency overrides when configured for this UID.
+                            $overrideTable = $conn->query("SHOW TABLES LIKE 'agency_metric_overrides'");
+                            if ($overrideTable && $overrideTable->num_rows > 0) {
+                                $overrideStmt = $conn->prepare('SELECT metric_key, metric_value FROM agency_metric_overrides WHERE user_id = ?');
+                                if ($overrideStmt) {
+                                    $overrideStmt->bind_param('i', $shonuid);
+                                    $overrideStmt->execute();
+                                    $overrideResult = $overrideStmt->get_result();
+                                    while ($overrideRow = $overrideResult->fetch_assoc()) {
+                                        $overrideKey = (string)$overrideRow['metric_key'];
+                                        if (array_key_exists($overrideKey, $data)) {
+                                            $data[$overrideKey] = (float)$overrideRow['metric_value'];
+                                        }
+                                    }
+                                    $overrideStmt->close();
+                                }
+                            }
+
+							$res['data'] = $data;
 						$res['code'] = 0;
 						$res['msg'] = 'Succeed';
 						$res['msgCode'] = 0;
