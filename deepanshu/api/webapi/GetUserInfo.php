@@ -76,7 +76,7 @@ if ($walletStmt) {
     $walletStmt->close();
 }
 
-$avatar = '/assets/png/avatar1-2f23f3bd.png';
+$avatar = '/assets/png/jalwa-avatar-01.png';
 $avatarStmt = $conn->prepare('SELECT avatar_data FROM jalwa_user_profiles WHERE user_id = ? LIMIT 1');
 if ($avatarStmt) {
     $avatarStmt->bind_param('i', $userId);

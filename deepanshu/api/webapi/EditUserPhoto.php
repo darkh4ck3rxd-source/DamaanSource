@@ -56,11 +56,25 @@ if (str_starts_with($userPhoto, 'data:image/')) {
     $storedPhoto = 'data:' . $mime . ';base64,' . base64_encode($binary);
 } else {
     $allowed = [
-        '1' => '/assets/png/avatar1-2f23f3bd.png',
-        'avatar1' => '/assets/png/avatar1-2f23f3bd.png',
-        'avatar-1' => '/assets/png/avatar1-2f23f3bd.png',
-        '2' => '/assets/png/avatar-5a79e664.png',
-        '3' => '/assets/png/avatar-ea3b8ee9.png'
+        '1' => '/assets/png/jalwa-avatar-01.png',
+        'avatar1' => '/assets/png/jalwa-avatar-01.png',
+        'avatar-1' => '/assets/png/jalwa-avatar-01.png',
+        '2' => '/assets/png/jalwa-avatar-02.png',
+        '3' => '/assets/png/jalwa-avatar-03.png',
+        '4' => '/assets/png/jalwa-avatar-04.png',
+        '5' => '/assets/png/jalwa-avatar-05.png',
+        '6' => '/assets/png/jalwa-avatar-06.png',
+        '7' => '/assets/png/jalwa-avatar-07.png',
+        '8' => '/assets/png/jalwa-avatar-08.png',
+        '9' => '/assets/png/jalwa-avatar-09.png',
+        '10' => '/assets/png/jalwa-avatar-10.png',
+        '11' => '/assets/png/jalwa-avatar-11.png',
+        '12' => '/assets/png/jalwa-avatar-12.png',
+        '13' => '/assets/png/jalwa-avatar-13.png',
+        '14' => '/assets/png/jalwa-avatar-14.png',
+        '15' => '/assets/png/jalwa-avatar-15.png',
+        '16' => '/assets/png/jalwa-avatar-16.png',
+        '17' => '/assets/png/jalwa-avatar-17.png'
     ];
     $storedPhoto = $allowed[$userPhoto] ?? (str_starts_with($userPhoto, '/') ? $userPhoto : '');
     if ($storedPhoto === '') {
