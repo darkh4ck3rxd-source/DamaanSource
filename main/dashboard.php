@@ -1,8 +1,11 @@
 <?php
+	ini_set('display_errors', '0');
+	ini_set('display_startup_errors', '0');
 	session_start();
-	if($_SESSION['unohs'] == null){
+	if (empty($_SESSION['unohs'])) {
 		header("location:index.php?msg=unauthorized");
-	}	
+		exit;
+	}
 	date_default_timezone_set("Asia/Kolkata");
 ?>
 <?php 

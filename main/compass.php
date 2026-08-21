@@ -1,13 +1,17 @@
 		<?php
-			$chkserial = mysqli_query($conn,"select * from `nirvahaka_shonu` where `unohs`='".$_SESSION['unohs']."'");
-			$salu = mysqli_fetch_array($chkserial);
-			$dashboard = $salu['dashboard'];
-			$wingomanager = $salu['wingomanager'];
-			$k3manager = $salu['k3manager'];
-			$d5manager = $salu['5dmanager'];
-			$finance = $salu['finance'];
-			$managegame = $salu['managegame'];
-            $support = $salu['support'];
+			ini_set('display_errors', '0');
+			ini_set('display_startup_errors', '0');
+			$adminSession = $_SESSION['unohs'] ?? '';
+			$adminSessionEscaped = mysqli_real_escape_string($conn, $adminSession);
+			$chkserial = mysqli_query($conn,"SELECT * FROM `nirvahaka_shonu` WHERE `unohs`='".$adminSessionEscaped."'");
+			$salu = $chkserial ? (mysqli_fetch_assoc($chkserial) ?: []) : [];
+			$dashboard = (int)($salu['dashboard'] ?? 0);
+			$wingomanager = (int)($salu['wingomanager'] ?? 0);
+			$k3manager = (int)($salu['k3manager'] ?? 0);
+			$d5manager = (int)($salu['5dmanager'] ?? 0);
+			$finance = (int)($salu['finance'] ?? 0);
+			$managegame = (int)($salu['managegame'] ?? 0);
+            $support = (int)($salu['support'] ?? 0);
 		?>
 		<ul class="nav">
           <li class="nav-item">
