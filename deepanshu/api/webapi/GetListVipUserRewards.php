@@ -26,7 +26,9 @@ $vipLevel = (int)($body['vipLevel'] ?? 1);
 $signature = strtoupper((string)($body['signature'] ?? ''));
 $expectedTask = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","taskId":' . $rewardType . '}'));
 $expectedReward = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","rewardType":' . $rewardType . '}'));
-if ($signature === '' || (!hash_equals($expectedTask, $signature) && !hash_equals($expectedReward, $signature))) {
+$expectedTaskWithLevel = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","taskId":' . $rewardType . ',"vipLevel":' . $vipLevel . '}'));
+$expectedRewardWithLevel = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","rewardType":' . $rewardType . ',"vipLevel":' . $vipLevel . '}'));
+if ($signature === '' || (!hash_equals($expectedTask, $signature) && !hash_equals($expectedReward, $signature) && !hash_equals($expectedTaskWithLevel, $signature) && !hash_equals($expectedRewardWithLevel, $signature))) {
     vip_rewards_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3]);
 }
 
