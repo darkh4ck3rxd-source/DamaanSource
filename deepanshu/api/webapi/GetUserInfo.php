@@ -83,7 +83,13 @@ if ($avatarStmt) {
     $avatarStmt->execute();
     $avatarRow = $avatarStmt->get_result()->fetch_assoc();
     if (!empty($avatarRow['avatar_data'])) {
-        $avatar = (string)$avatarRow['avatar_data'];
+        $savedAvatar = (string)$avatarRow['avatar_data'];
+        $legacyAvatars = [
+            '/assets/png/avatar1-2f23f3bd.png',
+            '/assets/png/avatar-5a79e664.png',
+            '/assets/png/avatar-ea3b8ee9.png'
+        ];
+        $avatar = in_array($savedAvatar, $legacyAvatars, true) ? '/assets/png/jalwa-avatar-01.png' : $savedAvatar;
     }
     $avatarStmt->close();
 }

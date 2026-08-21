@@ -35,7 +35,8 @@ const Avatar=defineComponent({
     const message=ref("");
     try{
       const info=JSON.parse(localStorage.getItem("userInfo")||"{}");
-      if(info.userPhoto)current.value=info.userPhoto;
+      const legacyAvatars=["/assets/png/avatar1-2f23f3bd.png","/assets/png/avatar-5a79e664.png","/assets/png/avatar-ea3b8ee9.png"];
+      if(info.userPhoto&&!legacyAvatars.includes(info.userPhoto))current.value=info.userPhoto;
     }catch(e){}
     const close=()=>router.go(-1);
     const choose=async choice=>{
@@ -52,6 +53,7 @@ const Avatar=defineComponent({
             const info=JSON.parse(localStorage.getItem("userInfo")||"{}");
             info.userPhoto=choice.path;
             localStorage.setItem("userInfo",JSON.stringify(info));
+            window.dispatchEvent(new CustomEvent("jalwa-avatar-updated",{detail:{userPhoto:choice.path}}));
           }catch(e){}
         }else {current.value=previous;message.value=result?.msg||"Unable to update profile picture"}
       }catch(e){current.value=previous;message.value="Unable to update profile picture"}
@@ -73,6 +75,7 @@ const Avatar=defineComponent({
             const info=JSON.parse(localStorage.getItem("userInfo")||"{}");
             info.userPhoto=reader.result;
             localStorage.setItem("userInfo",JSON.stringify(info));
+            window.dispatchEvent(new CustomEvent("jalwa-avatar-updated",{detail:{userPhoto:reader.result}}));
           }catch(e){}
         }else message.value=result?.msg||"Unable to update profile picture";
       }).catch(()=>{message.value="Unable to update profile picture"});
