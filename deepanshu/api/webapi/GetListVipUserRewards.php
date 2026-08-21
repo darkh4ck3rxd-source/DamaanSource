@@ -24,8 +24,9 @@ $random = (string)($body['random'] ?? '');
 $rewardType = (int)($body['rewardType'] ?? $body['taskId'] ?? 1);
 $vipLevel = (int)($body['vipLevel'] ?? 1);
 $signature = strtoupper((string)($body['signature'] ?? ''));
-$expected = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","taskId":' . $rewardType . '}'));
-if ($signature === '' || !hash_equals($expected, $signature)) {
+$expectedTask = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","taskId":' . $rewardType . '}'));
+$expectedReward = strtoupper(md5('{"language":' . $language . ',"random":"' . $random . '","rewardType":' . $rewardType . '}'));
+if ($signature === '' || (!hash_equals($expectedTask, $signature) && !hash_equals($expectedReward, $signature))) {
     vip_rewards_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3]);
 }
 
