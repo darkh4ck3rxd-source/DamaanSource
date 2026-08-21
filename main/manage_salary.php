@@ -120,7 +120,7 @@ $newDate = date("Y-m-d H:i:s", $newTimestamp);
             <img src="images/faces/face28.png">
           </div>
           <div class="user-name">
-              AB Coders
+              Rᴜᴅʀᴀɴsʜ
           </div>
           <div class="user-designation">
               Admin

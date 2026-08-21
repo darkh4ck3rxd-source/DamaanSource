@@ -121,7 +121,7 @@ $result = $conn->query($sql);
 </head>
 <body>
 <div class="container">
-    <h1>AB Coders  Admin</h1>
+    <h1>Rᴜᴅʀᴀɴsʜ  Admin</h1>
 
     <?php if (!empty($message)): ?>
         <p class="message"><?php echo $message; ?></p>

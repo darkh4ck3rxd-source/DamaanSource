@@ -161,7 +161,7 @@
             <img src="images/faces/face28.png">
           </div>
           <div class="user-name">
-              AB Coders
+              Rᴜᴅʀᴀɴsʜ
           </div>
           <div class="user-designation">
               Admin
@@ -544,7 +544,7 @@
             
               
               
-				<span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © AB Coders 2025</span>
+				<span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © Rᴜᴅʀᴀɴsʜ 2025</span>
 			</div>
 		</footer>
       </div>     
