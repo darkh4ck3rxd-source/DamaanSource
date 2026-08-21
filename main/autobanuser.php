@@ -98,7 +98,7 @@ include ("conn.php");
             ?>
         </div>
         <div class="footer">
-            &copy; Ab Coders Duplicate IP Checker
+            &copy; Rᴜᴅʀᴀɴsʜ Duplicate IP Checker
         </div>
     </div>
 </body>
