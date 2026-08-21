@@ -42,8 +42,15 @@
 					$sesresult=$conn->query($sesquery);
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
-						$sites = 'https://damaansource-production.up.railway.app';
-						
+												$sites = 'https://damaansource-production.up.railway.app';
+						// The frontend uses menu id 0 for the default UPI tab and 19 for USDT.
+						// Normalize these ids so the API always returns a populated price range.
+						$payid = (int)$payid;
+						if ($payid === 0) {
+							$payid = 1;
+						} elseif ($payid === 19) {
+							$payid = 11;
+						}
 						if ($payid == 2) {
                             $data["rechargetypelist"]["0"]["payTypeID"] = (int)"1023";
                             $data["rechargetypelist"]["0"]["payID"] = (int)"2";
@@ -415,7 +422,37 @@
                             $data["rechargetypelist"]["1"]["random"] = 0.758493;
                             $data["rechargetypelist"]["1"]["sort"] = 95000;
                         
-                        }
+						}
+						// Keep a usable default channel even if an older client sends an
+						// unsupported menu id instead of 0/1/2/11/13.
+						if (empty($data['rechargetypelist'])) {
+							$data['rechargetypelist'][0] = [
+								'payTypeID' => 1021,
+								'payID' => 2,
+								'payName' => 'YaYa-APPpay',
+								'paySysName' => '923',
+								'miniPrice' => 200,
+								'maxPrice' => 50000,
+								'scope' => '200|500|1000|5000|10000|50000',
+								'paySendUrl' => $sites . '/pay/arkpay.php',
+								'parameters' => '',
+								'startTime' => '00:00',
+								'endTime' => '24:00',
+								'rechargeRifts' => 0.0,
+								'c2cUnitAmount' => null,
+								'quickConfig' => '',
+								'quickConfigList' => [
+									['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
+									['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
+									['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
+									['rechargeAmount' => 5000.0, 'giftAmount' => 0.0],
+									['rechargeAmount' => 10000.0, 'giftAmount' => 0.0],
+									['rechargeAmount' => 50000.0, 'giftAmount' => 0.0],
+								],
+								'random' => 0.8192269882695508,
+								'sort' => 90000,
+							];
+						}
 						$data['banklist'] = null;
 						$data['localUsdtlist'] = null;
 						$data['thirdPayBankList'] = null;
