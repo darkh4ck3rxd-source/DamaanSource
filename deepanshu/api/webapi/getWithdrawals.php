@@ -1,7 +1,7 @@
-<?php 
+<?php
 	include "../../conn.php";
 	include "../../functions2.php";
-	
+
 	header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
 	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
@@ -9,7 +9,7 @@
 	$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 	header('Access-Control-Allow-Origin: ' . $origin);
 	header('vary: Origin');
-	
+
 	date_default_timezone_set("Asia/Kolkata");
 	$shnunc = date("Y-m-d H:i:s");
 	$res = [
@@ -20,7 +20,7 @@
 	];
 	$shonubody = file_get_contents("php://input");
 	$shonupost = json_decode($shonubody, true);
-	
+
 	function replaceWithAsterisks($inputString) {
 		if (strlen($inputString) < 10) {
 			return $inputString;
@@ -32,8 +32,8 @@
 		$resultString = $before . $replaced . $after;
 		return $resultString;
 	}
-	
-	
+
+
 	if ($_SERVER['REQUEST_METHOD'] != 'GET') {
 		if (isset($shonupost['language']) && isset($shonupost['random']) && isset($shonupost['signature']) && isset($shonupost['timestamp']) && isset($shonupost['withdrawid'])) {
 			$language = htmlspecialchars(mysqli_real_escape_string($conn, $shonupost['language']));
@@ -44,7 +44,7 @@
 			$shonusign = strtoupper(md5($shonustr));
 			if($shonusign == $signature){
 				$bearer = explode(" ", $_SERVER['HTTP_AUTHORIZATION']);
-				$author = $bearer[1];				
+				$author = $bearer[1];
 				$is_jwt_valid = is_jwt_valid($author);
 				$data_auth = json_decode($is_jwt_valid, 1);
 				if($data_auth['status'] === 'Success') {
@@ -60,11 +60,11 @@
 							  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru != 'TRC'
 							  ORDER BY shonu DESC LIMIT 1";
 							$samasyephalitansa = $conn->query($samasye);
-							$samasyephalitansa_dhadi = mysqli_num_rows($samasyephalitansa);	
+							$samasyephalitansa_dhadi = mysqli_num_rows($samasyephalitansa);
 							if($samasyephalitansa_dhadi >= 1){
-								$samasyephalitansa_sreni = mysqli_fetch_array($samasyephalitansa);						
+								$samasyephalitansa_sreni = mysqli_fetch_array($samasyephalitansa);
 								$data['lastBandCarkName'] = $samasyephalitansa_sreni['phalanubhavi'];
-								
+
 								$samasye = "SELECT shonu, khatehesaru, khatesankhye, kod, duravani
 								  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru != 'TRC'
 								  ORDER BY shonu DESC";
@@ -74,7 +74,7 @@
 									$data['withdrawalslist'][$i]['bid'] = $row['shonu'];
 									$data['withdrawalslist'][$i]['bankName'] = $row['khatehesaru'];
 									$data['withdrawalslist'][$i]['beneficiaryName'] = '';
-									
+
 									$data['withdrawalslist'][$i]['accountNo'] = replaceWithAsterisks($row['khatesankhye']);
 									$data['withdrawalslist'][$i]['ifsCode'] = $row['kod'];
 									$data['withdrawalslist'][$i]['withType'] = 1;
@@ -95,11 +95,11 @@
 							  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru = 'TRC'
 							  ORDER BY shonu DESC LIMIT 1";
 							$samasyephalitansa = $conn->query($samasye);
-							$samasyephalitansa_dhadi = mysqli_num_rows($samasyephalitansa);	
+							$samasyephalitansa_dhadi = mysqli_num_rows($samasyephalitansa);
 							if($samasyephalitansa_dhadi >= 1){
-								$samasyephalitansa_sreni = mysqli_fetch_array($samasyephalitansa);						
+								$samasyephalitansa_sreni = mysqli_fetch_array($samasyephalitansa);
 								$data['lastBandCarkName'] = $samasyephalitansa_sreni['phalanubhavi'];
-								
+
 								$samasye = "SELECT shonu, khatehesaru, khatesankhye, kod, duravani
 								  FROM khate WHERE byabaharkarta = $shonuid AND khatehesaru = 'TRC'
 								  ORDER BY shonu DESC";
@@ -109,7 +109,7 @@
 									$data['withdrawalslist'][$i]['bid'] = $row['shonu'];
 									$data['withdrawalslist'][$i]['bankName'] = $row['khatehesaru'];
 									$data['withdrawalslist'][$i]['beneficiaryName'] = '';
-									
+
 									$data['withdrawalslist'][$i]['accountNo'] = replaceWithAsterisks($row['khatesankhye']);
 									$data['withdrawalslist'][$i]['ifsCode'] = $row['kod'];
 									$data['withdrawalslist'][$i]['withType'] = 1;
@@ -125,13 +125,13 @@
 								$data['withdrawalslist'] = [];
 							}
 						}
-						
+
 						// Query to retrieve data based on user ID and date
 $samasye_1 = "SELECT shonu
-              FROM hintegedukolli 
-              WHERE balakedara = '".$shonuid."' 
+              FROM hintegedukolli
+              WHERE balakedara = '".$shonuid."'
               AND DATE(dinankavannuracisi) = date('".$shnunc."')";
-              
+
 $samasyephalitansa_1 = $conn->query($samasye_1);
 $shelly = mysqli_num_rows($samasyephalitansa_1);
 if ($withdrawid == 3) {
@@ -160,21 +160,28 @@ $balarr = mysqli_fetch_array($balresult);
 
 // Assign withdrawal amount
 $data["withdrawalsrule"]["amount"] = $balarr["motta"];
-						
+
 						$rtatqr = "SELECT SUM(motta) as sote
 						  FROM thevani
 						  WHERE balakedara = '".$shonuid."' AND sthiti = '1'";
 						$rtatresult = $conn->query($rtatqr);
 						$rtat_ar = mysqli_fetch_array($rtatresult);
-						
+
 						$rtatqr_a = "SELECT SUM(price) as sote
 						  FROM hodike_balakedara
 						  WHERE userkani = '".$shonuid."'";
 						$rtatresult_a = $conn->query($rtatqr_a);
 						$rtat_ar_a = mysqli_fetch_array($rtatresult_a);
-						
-						$sotek = $rtat_ar['sote'] + $rtat_ar_a['sote'] + 0;						
-						
+
+						$sotek = (float)($rtat_ar['sote'] ?? 0) + (float)($rtat_ar_a['sote'] ?? 0);
+
+							$manualWagerAdjustment = 0.0;
+							$wagerHelper = __DIR__ . '/../../../wager_functions.php';
+							if (is_file($wagerHelper)) {
+								require_once $wagerHelper;
+								$manualWagerAdjustment = get_wager_adjustment($conn, (int)$shonuid);
+							}
+
                         $bet_wingo_trx = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_trx` where byabaharkarta = '".$shonuid."'"));
                         $bet_wingo_trx3 = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_trx3` where byabaharkarta = '".$shonuid."'"));
                         $bet_wingo_trx5 = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_trx5` where byabaharkarta = '".$shonuid."'"));
@@ -191,14 +198,14 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
 						$bet_5d_3 = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_aidudi_drei` where byabaharkarta = '".$shonuid."'"));
 						$bet_5d_5 = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_aidudi_funf` where byabaharkarta = '".$shonuid."'"));
 						$bet_5d_10 = mysqli_fetch_assoc(mysqli_query($conn,"SELECT sum(ketebida) as total FROM `bajikattuttate_aidudi_zehn` where byabaharkarta = '".$shonuid."'"));
-						$total_bet = $bet_wingo_trx['total']+$bet_wingo_trx3['total']+$bet_wingo_trx5['total']+$bet_wingo_trx10['total']+$bet_wingo_1['total'] + $bet_wingo_3['total'] + $bet_wingo_5['total'] + $bet_wingo_10['total'] + $bet_k3_1['total'] + $bet_k3_3['total'] + $bet_k3_5['total'] + $bet_k3_10['total'] + $bet_5d_1['total'] + $bet_5d_3['total'] + $bet_5d_5['total'] + $bet_5d_10['total'];												
-						
-						if ($sotek > $total_bet) {
+						$total_bet = $bet_wingo_trx['total']+$bet_wingo_trx3['total']+$bet_wingo_trx5['total']+$bet_wingo_trx10['total']+$bet_wingo_1['total'] + $bet_wingo_3['total'] + $bet_wingo_5['total'] + $bet_wingo_10['total'] + $bet_k3_1['total'] + $bet_k3_3['total'] + $bet_k3_5['total'] + $bet_k3_10['total'] + $bet_5d_1['total'] + $bet_5d_3['total'] + $bet_5d_5['total'] + $bet_5d_10['total'];
+
+						if (($sotek + $manualWagerAdjustment) > $total_bet) {
   			  					$wiwo = 0;
-  				  				$data["withdrawalsrule"]["amountofCode"] = $sotek - $total_bet;
+								$data["withdrawalsrule"]["amountofCode"] = round(($sotek + $manualWagerAdjustment) - $total_bet, 2);
 																								}
 								// Check if $sotek is less than or equal to $total_bet
-						else if ($sotek <= $total_bet) {
+						else if (($sotek + $manualWagerAdjustment) <= $total_bet) {
    						 if ($rtat_ar['sote'] == null || $rtat_ar['sote'] == '') {
      					   $wiwo = 0;
   							  } else {
@@ -212,13 +219,13 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
 				$data["withdrawalsrule"]["c2cUnitAmount"] = 0;
 				$data["withdrawalsrule"]["uRate"] = 93;
 				$data["withdrawalsrule"]["uGold"] = 0;
-						
+
 						$res['data'] = $data;
 						$res['code'] = 0;
 						$res['msg'] = 'Succeed';
 						$res['msgCode'] = 0;
 						http_response_code(200);
-						echo json_encode($res);					
+						echo json_encode($res);
 					}
 					else{
 						$res['code'] = 4;
@@ -226,14 +233,14 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
 						$res['msgCode'] = 2;
 						http_response_code(401);
 						echo json_encode($res);
-					}					
+					}
 				}
-				else{					
+				else{
 					$res['code'] = 4;
 					$res['msg'] = 'No operation permission';
 					$res['msgCode'] = 2;
 					http_response_code(401);
-					echo json_encode($res);					
+					echo json_encode($res);
 				}
 			}
 			else{
@@ -241,7 +248,7 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
 				$res['msg'] = 'Wrong signature';
 				$res['msgCode'] = 3;
 				http_response_code(200);
-				echo json_encode($res);				
+				echo json_encode($res);
 			}
 		}
 		else{
@@ -249,9 +256,9 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
 			$res['msg'] = 'Param is Invalid';
 			$res['msgCode'] = 6;
 			http_response_code(200);
-			echo json_encode($res);			
-		}		
-	} else {		
+			echo json_encode($res);
+		}
+	} else {
 		http_response_code(405);
 		echo json_encode($res);
 	}
