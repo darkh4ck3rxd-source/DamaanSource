@@ -1,16 +1,19 @@
 <?php
 	date_default_timezone_set('Asia/Kolkata');
 
-	define('DB_SERVER', 'localhost');
-	define('DB_USERNAME', 'winningb_paisa');
-	define('DB_PASSWORD', 'winningb_paisa');
-	define('DB_NAME', 'winningb_paisa');
+$dbServer = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
+	$dbUser = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
+	$dbPassword = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: '';
+	$dbName = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'railway';
+	$dbPort = (int)(getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: 3306);
 
-	$conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
-	if($conn == false){
-		dir('Error: Cannot connect');
-		echo "Fail";
+	$conn = mysqli_init();
+	mysqli_options($conn, MYSQLI_OPT_CONNECT_TIMEOUT, 10);
+	if (!mysqli_real_connect($conn, $dbServer, $dbUser, $dbPassword, $dbName, $dbPort)) {
+		http_response_code(500);
+		die('Error: Cannot connect to database');
 	}
+	mysqli_set_charset($conn, 'utf8mb4');
 	
 	$numbermappings = array("zero", "one","two","three", "four","five","six","seven","eight","nine");
 	

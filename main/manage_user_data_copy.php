@@ -7,9 +7,14 @@ $dbDetails = array(
     'db'   => (getenv('MYSQLDATABASE') ?: 'railway'), 'port' => (int)(getenv('MYSQLPORT') ?: 3306)
 );
 
-// Start session and get the current user
+// Start session and require an authenticated admin
 session_start();
-$agent_user = $_SESSION['nirvahaka_hesaru'];
+if (empty($_SESSION['unohs'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized']);
+    exit;
+}
+$agent_user = (int)($_SESSION['nirvahaka_hesaru'] ?? 0);
 
 // Establish database connection
 $conn = mysqli_connect($dbDetails['host'], $dbDetails['user'], $dbDetails['pass'], $dbDetails['db']);
@@ -17,18 +22,19 @@ if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
-// Get the current user's owncode
-$sql2 = "SELECT owncode FROM shonu_subjects WHERE id = '$agent_user'";
-$result = mysqli_query($conn, $sql2);
-if (!$result) {
-    die("Error fetching owncode: " . mysqli_error($conn));
-}
-$row = mysqli_fetch_assoc($result);
-$current_owncode = $row['owncode'] ?? null;
-
-// Debug: Check if owncode is fetched
-if (empty($current_owncode)) {
-    die("Owncode not found for the current user.");
+// Admin sessions do not represent a customer row. Keep the optional
+// own-code filter empty so the endpoint can list all customers safely.
+$current_owncode = '';
+if ($agent_user > 0) {
+    $owncodeStmt = mysqli_prepare($conn, 'SELECT owncode FROM shonu_subjects WHERE id = ? LIMIT 1');
+    if ($owncodeStmt) {
+        mysqli_stmt_bind_param($owncodeStmt, 'i', $agent_user);
+        mysqli_stmt_execute($owncodeStmt);
+        $owncodeResult = mysqli_stmt_get_result($owncodeStmt);
+        $owncodeRow = $owncodeResult ? mysqli_fetch_assoc($owncodeResult) : null;
+        $current_owncode = (string)($owncodeRow['owncode'] ?? '');
+        mysqli_stmt_close($owncodeStmt);
+    }
 }
 
 // DB table query with filtering based on owncode and determining levels

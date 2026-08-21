@@ -1,16 +1,10 @@
 <?php
-    session_start();
-    if ($_SESSION['unohs'] == null) {
-        header("location:index.php?msg=unauthorized");
-        exit(); // Ensures the script stops after redirection
-    }
-
-    session_start();
-    $a = $_SESSION['nirvahaka_hesaru'];
-    echo $a; // Print the value of $a
-?>
-<?php
-    include("conn.php");
+session_start();
+if (empty($_SESSION['unohs'])) {
+    header('Location: index.php?msg=unauthorized');
+    exit;
+}
+require_once __DIR__ . '/conn.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

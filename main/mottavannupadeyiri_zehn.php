@@ -1,14 +1,18 @@
-<?php 
-	include("conn_zehn.php");
-?>
-
 <?php
-	$periodid=$_POST['periodid'];
-	$actiontype=$_POST['actiontype'];
+require_once __DIR__ . '/conn_zehn.php';
+
+$periodid = trim((string)($_POST['periodid'] ?? ''));
+$actiontype = (string)($_POST['actiontype'] ?? '');
+if ($periodid === '' || !in_array($actiontype, ['getdata', 'refreshtdata'], true)) {
+    exit;
+}
 
 	if($actiontype=='getdata'){
-		$Query=mysqli_query($conn,"select sankhye, banna, sthiti, shonu from `hastacalita_phalitansa_zehn`"); 
-		while($row=mysqli_fetch_array($Query)){
+            $Query = mysqli_query($conn, "SELECT sankhye, banna, sthiti, shonu FROM `hastacalita_phalitansa_zehn`");
+            if (!$Query) {
+                exit;
+            }
+            while ($row = mysqli_fetch_assoc($Query)) {
 			if($row['sankhye']==1||$row['sankhye']==3||$row['sankhye']==7||$row['sankhye']==9)	
 			{
 				$totalusernumber=getusercount($conn,$periodid,"'11',".$row['sankhye']."");
@@ -78,9 +82,12 @@
 ?>
 <?php
 		$sqlA = mysqli_query($conn,"Update `hastacalita_phalitansa_zehn` set sthiti = '0'");			
-		$samasye = mysqli_query($conn,"select * from `hastacalita_phalitansa_zehn`");
-		$i=0; 
-		while($dhadi = mysqli_fetch_array($samasye)){
+            $samasye = mysqli_query($conn, "SELECT * FROM `hastacalita_phalitansa_zehn`");
+            if (!$samasye) {
+                exit;
+            }
+            $i = 0;
+            while ($dhadi = mysqli_fetch_assoc($samasye)) {
 			$i++;
 ?>
 			<tr>

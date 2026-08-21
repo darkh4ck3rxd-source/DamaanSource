@@ -1,25 +1,31 @@
-<?php 
-	include("conn.php");
-	$getperiod_Query=mysqli_query($conn,"select * from `gelluonduhogu_zehn` order by kramasankhye desc limit 1");
-	$getperiodRow=mysqli_num_rows($getperiod_Query);
-	$getperiodidRow=mysqli_fetch_array($getperiod_Query);
-	$periodid=$getperiodidRow['atadaaidi'];	
-	$chkResult=mysqli_query($conn,"select * from `gellaluhogiondu_phalitansa_zehn` where `kalaparichaya`='".$periodid."'");
-	$chkResultRow=mysqli_num_rows($chkResult);	
-	if($chkResultRow == null){
-		$selectData=mysqli_query($conn,"select * from `bajikattuttate_zehn` where `kalaparichaya`='".$periodid."'");
-		$selectdataRow=mysqli_num_rows($selectData);
-		if($selectdataRow != null){
-			$chksapregreenQuery=mysqli_query($conn,"select * from `bajikattuttate_zehn` where `kalaparichaya`='".$periodid."'");
-			$chksapregreenRow=mysqli_num_rows($chksapregreenQuery);
-			if($chksapregreenRow != null){
-				$totalgreentabquery=mysqli_query($conn,"SELECT (SUM(ketebida)-(SUM(ketebida)/100*2)) as totalamount
-					FROM
-					`bajikattuttate_zehn` where `kalaparichaya`='$periodid'");
-				$totalgreentab=mysqli_fetch_array($totalgreentabquery);
-				echo $totalgreentab["totalamount"];
-			}else {echo 0;}
-		}else {echo "0";}			
-	}
-	else{echo 0;}
+<?php
+require_once __DIR__ . '/conn.php';
+
+$getperiodQuery = mysqli_query($conn, "SELECT atadaaidi FROM `gelluonduhogu_zehn` ORDER BY kramasankhye DESC LIMIT 1");
+$getperiodRow = $getperiodQuery ? (mysqli_fetch_assoc($getperiodQuery) ?: []) : [];
+$periodid = (string)($getperiodRow['atadaaidi'] ?? '');
+
+if ($periodid === '') {
+    echo '0';
+    exit;
+}
+
+$checkResult = mysqli_query($conn, "SELECT 1 FROM `gellaluhogiondu_phalitansa_zehn` WHERE `kalaparichaya` = '" . mysqli_real_escape_string($conn, $periodid) . "' LIMIT 1");
+$checkResultRows = $checkResult ? mysqli_num_rows($checkResult) : 0;
+
+if ($checkResultRows > 0) {
+    echo '0';
+    exit;
+}
+
+$periodEscaped = mysqli_real_escape_string($conn, $periodid);
+$selectData = mysqli_query($conn, "SELECT 1 FROM `bajikattuttate_zehn` WHERE `kalaparichaya` = '$periodEscaped' LIMIT 1");
+if (!$selectData || mysqli_num_rows($selectData) === 0) {
+    echo '0';
+    exit;
+}
+
+$totalQuery = mysqli_query($conn, "SELECT (COALESCE(SUM(ketebida), 0) - (COALESCE(SUM(ketebida), 0) / 100 * 2)) AS totalamount FROM `bajikattuttate_zehn` WHERE `kalaparichaya` = '$periodEscaped'");
+$totalRow = $totalQuery ? (mysqli_fetch_assoc($totalQuery) ?: []) : [];
+echo (string)($totalRow['totalamount'] ?? '0');
 ?>
