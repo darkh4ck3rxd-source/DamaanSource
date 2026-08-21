@@ -42,6 +42,7 @@ const Avatar=defineComponent({
       if(busy.value)return;
       busy.value=true;
       message.value="";
+      const previous=current.value;
       current.value=choice.path;
       try{
         const result=await savePhoto(choice.id);
@@ -52,9 +53,8 @@ const Avatar=defineComponent({
             info.userPhoto=choice.path;
             localStorage.setItem("userInfo",JSON.stringify(info));
           }catch(e){}
-          setTimeout(close,350);
-        }else message.value=result?.msg||"Unable to update profile picture";
-      }catch(e){message.value="Unable to update profile picture"}
+        }else {current.value=previous;message.value=result?.msg||"Unable to update profile picture"}
+      }catch(e){current.value=previous;message.value="Unable to update profile picture"}
       finally{busy.value=false}
     };
     const upload=event=>{
@@ -74,7 +74,6 @@ const Avatar=defineComponent({
             info.userPhoto=reader.result;
             localStorage.setItem("userInfo",JSON.stringify(info));
           }catch(e){}
-          setTimeout(close,350);
         }else message.value=result?.msg||"Unable to update profile picture";
       }).catch(()=>{message.value="Unable to update profile picture"});
       reader.readAsDataURL(file);
@@ -94,10 +93,10 @@ const Avatar=defineComponent({
             onClick:()=>choose(choice),
             disabled:busy.value,
             "aria-label":"Choose avatar "+choice.id,
-            style:"border:3px solid "+(current.value===choice.path?"#2ee6d1":"transparent")+";padding:2px;border-radius:50%;background:transparent;aspect-ratio:1;overflow:hidden;opacity:"+(busy.value?.65:1)
-          },[h("img",{src:choice.path,style:"width:100%;height:100%;border-radius:50%;object-fit:cover;display:block"})]);
+            style:"position:relative;border:3px solid "+(current.value===choice.path?"#2ee6d1":"transparent")+";padding:2px;border-radius:50%;background:transparent;aspect-ratio:1;overflow:hidden;opacity:"+(busy.value?.65:1)
+          },[h("img",{src:choice.path,style:"width:100%;height:100%;border-radius:50%;object-fit:cover;display:block"}),h("span",{style:"position:absolute;right:1px;bottom:1px;width:22px;height:22px;border-radius:50%;background:#21dcca;color:#06133e;font-size:16px;font-weight:900;line-height:22px;box-shadow:0 1px 4px #000;opacity:"+(current.value===choice.path?1:0)},"✓")]);
         })),
-        h("label",{style:"display:inline-block;background:#21dcca;color:#06133e;padding:13px 22px;border-radius:24px;font-weight:700"},["Upload picture",h("input",{type:"file",accept:"image/png,image/jpeg,image/webp",onChange:upload,style:"display:none"})]),
+        h("label",{style:"display:inline-block;background:#21dcca;color:#06133e;padding:13px 22px;border-radius:24px;font-weight:700"},["Update picture",h("input",{type:"file",accept:"image/png,image/jpeg,image/webp",onChange:upload,style:"display:none"})]),
         busy.value?h("p",null,"Saving..."):null,
         message.value?h("p",{style:"color:#ffd166"},message.value):null
       ])
