@@ -132,7 +132,7 @@ function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
         </div>
         <div class="qr-card">
           <h4>PhonePe UPI Intent</h4>
-          <p class="help">UPI_PHONEPE and UPI_PHONEPAY both open PhonePe with the selected amount and numeric order ID in the remark.</p>
+          <p class="help">UPI_PHONEPE opens PhonePe with the selected amount and numeric order ID in the remark.</p>
           <label>PhonePe UPI ID / VPA</label><input class="form-control" type="text" name="phonepe_upi_id" value="<?= h($settings['phonepe_upi_id']) ?>" placeholder="example@ybl">
           <label>Payee name shown in PhonePe</label><input class="form-control" type="text" name="phonepe_upi_name" value="<?= h($settings['phonepe_upi_name']) ?>" placeholder="Jalwa">
         </div>

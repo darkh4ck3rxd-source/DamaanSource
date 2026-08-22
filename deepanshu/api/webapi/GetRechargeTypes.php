@@ -453,11 +453,10 @@
 								'sort' => 90000,
 							];
 						}
-							// UPI_PHONEPE and UPI_PHONEPAY each use the same PhonePe intent
-							// page but keep separate channel names and numeric order records.
-							if ((int)$payid === 1 || (int)$payid === 14) {
-								$phoneChannel = ((int)$payid === 14) ? 'UPI_PHONEPAY' : 'UPI_PHONEPE';
-								$phoneTypeId = ((int)$payid === 14) ? 2194 : 2193;
+							// UPI_PHONEPE uses the PhonePe intent page with numeric order records.
+							if ((int)$payid === 1) {
+								$phoneChannel = 'UPI_PHONEPE';
+								$phoneTypeId = 2193;
 								$data['rechargetypelist'] = [[
 									'payTypeID' => $phoneTypeId,
 									'payID' => (int)$payid,

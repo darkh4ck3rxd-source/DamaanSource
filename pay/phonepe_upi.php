@@ -39,7 +39,7 @@ $expiresAt = 0;
 $isExpired = false;
 $paymentConfirmed = $_SERVER['REQUEST_METHOD'] === 'POST' && (string)($_POST['payment_done'] ?? '') === '1';
 $channel = strtoupper(trim((string)($_GET['channel'] ?? 'UPI_PHONEPE')));
-if (!in_array($channel, ['UPI_PHONEPE', 'UPI_PHONEPAY'], true)) {
+if ($channel !== 'UPI_PHONEPE') {
     $channel = 'UPI_PHONEPE';
 }
 
