@@ -42,14 +42,14 @@
 					if($sesnum == 1){
 						$data['typelist'][0]['payID'] = 2;
 						$data['typelist'][0]['payTypeID'] = 0;
-						$data['typelist'][0]['payName'] = 'Wake UP-APP';
+						$data['typelist'][0]['payName'] = 'Expert UPI-QR';
 						$data['typelist'][0]['paySysName'] = 'Online Pay';
-						$data['typelist'][0]['payNameUrl'] = 'https://pub-628304d7b25d454abf303bfafba6a0.r2.dev/ALADDINN/payNameIcon/payNameIcon_20240324160846bfy7.png';
-						$data['typelist'][0]['payNameUrl2'] = 'https://pub-628304d7b25d454abf303bfafba6a0.r2.dev/ALADDINN/payNameIcon/payNameIcon2_20240324160846gdbv.png';
+						$data['typelist'][0]['payNameUrl'] = '/assets/png/expert-upi-qr.png';
+						$data['typelist'][0]['payNameUrl2'] = '/assets/png/expert-upi-qr.png';
 $data['typelist'][0]['minPrice'] = 200;
 							$data['typelist'][0]['maxPrice'] = 50000;
 							$data['typelist'][0]['scope'] = '200|500|1000|5000|10000|50000';
-						$data['typelist'][0]['typeName'] = 'Wake UP-APP';
+						$data['typelist'][0]['typeName'] = 'Expert UPI-QR';
 						$data['typelist'][0]['typeNameCode'] = 0;
 						$data['typelist'][0]['maxRechargeRifts'] = 0.00;
 						$data['typelist'][0]['sort'] = 9; 

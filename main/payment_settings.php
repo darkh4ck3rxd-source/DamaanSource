@@ -116,13 +116,13 @@ function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       <?php if ($message !== ''): ?><div class="alert alert-<?= h($messageType) ?>"><?= h($message) ?></div><?php endif; ?>
       <form method="post" enctype="multipart/form-data">
         <div class="qr-card">
-          <h4>Wake UP-APP — UPI</h4>
-          <p class="help">This QR is shown when the user selects Wake UP-APP. Upload a QR image or enter a hosted image URL.</p>
-          <?php if (str_starts_with($settings['wake_upi_qr'], 'data:image/')): ?><img class="qr-preview mb-3" src="<?= h($settings['wake_upi_qr']) ?>" alt="Wake UPI QR"><br><?php endif; ?>
-          <label>Upload Wake UPI QR</label><input class="form-control" type="file" name="wake_upi_qr" accept="image/png,image/jpeg,image/webp,image/gif">
-          <label>Or hosted Wake UPI QR URL</label><input class="form-control" type="url" name="wake_upi_qr_url" value="<?= h(str_starts_with($settings['wake_upi_qr'], 'data:') ? '' : $settings['wake_upi_qr']) ?>" placeholder="https://.../wake-upi-qr.png">
-          <label>Wake UPI ID</label><input class="form-control" type="text" name="wake_upi_id" value="<?= h($settings['wake_upi_id']) ?>" placeholder="example@upi">
-          <label>Minimum Wake UPI amount</label><input class="form-control" type="number" min="1" name="wake_min_amount" value="<?= h($settings['wake_min_amount']) ?>">
+          <h4>Expert UPI-QR</h4>
+          <p class="help">This QR is shown when the user selects Expert UPI-QR. Upload a QR image or enter a hosted image URL.</p>
+          <?php if (str_starts_with($settings['wake_upi_qr'], 'data:image/')): ?><img class="qr-preview mb-3" src="<?= h($settings['wake_upi_qr']) ?>" alt="Expert UPI-QR"><br><?php endif; ?>
+          <label>Upload Expert UPI-QR</label><input class="form-control" type="file" name="wake_upi_qr" accept="image/png,image/jpeg,image/webp,image/gif">
+          <label>Or hosted Expert UPI-QR URL</label><input class="form-control" type="url" name="wake_upi_qr_url" value="<?= h(str_starts_with($settings['wake_upi_qr'], 'data:') ? '' : $settings['wake_upi_qr']) ?>" placeholder="https://.../expert-upi-qr.png">
+          <label>Expert UPI-QR UPI ID</label><input class="form-control" type="text" name="wake_upi_id" value="<?= h($settings['wake_upi_id']) ?>" placeholder="example@upi">
+          <label>Minimum Expert UPI-QR amount</label><input class="form-control" type="number" min="1" name="wake_min_amount" value="<?= h($settings['wake_min_amount']) ?>">
         </div>
         <div class="qr-card">
           <h4>Paytm UPI Intent</h4>
