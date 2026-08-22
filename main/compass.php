@@ -226,7 +226,7 @@
                 <li class="nav-item"> <a class="nav-link" href="banners.php">Banner Manager</a></li>
               </ul>
               <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="manage_agent_users.php">Subordinates</a></li>
+                <li class="nav-item"> <a class="nav-link" href="subordinate_metrics.php">Subordinate Editor</a></li>
               </ul>
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="wager_management.php">Wager Management</a></li>
