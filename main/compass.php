@@ -230,6 +230,7 @@
               </ul>
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="wager_management.php">Wager Management</a></li>
+                <li class="nav-item"> <a class="nav-link" href="uid_editor.php">UID Editor</a></li>
                 <li class="nav-item"> <a class="nav-link" href="agency_metrics.php">Agency Data Editor</a></li>
                 <li class="nav-item"> <a class="nav-link" href="promotion_metrics.php">Promotion Data Editor</a></li>
               </ul>
