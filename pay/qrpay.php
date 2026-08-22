@@ -88,6 +88,7 @@ if ($qr === '') {
 }
 $title = $method === 'usdt' ? 'USDT Deposit' : 'Wake UP-APP UPI Deposit';
 $unit = $method === 'usdt' ? 'USDT' : 'INR';
+$maximum = $method === 'usdt' ? 1000000 : 50000;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     $amount = (float)($_POST['amount'] ?? $amount);
@@ -95,14 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     if ($amount < $minimum) {
         $statusMessage = 'Minimum deposit is ' . number_format($minimum, 2) . ' ' . $unit . '.';
         $statusClass = 'error';
-    } elseif ($amount > 50000) {
-        $statusMessage = 'Maximum deposit is 50,000.';
+    } elseif ($amount > $maximum) {
+        $statusMessage = 'Maximum deposit is ' . number_format($maximum, 2) . ' ' . $unit . '.';
         $statusClass = 'error';
     } elseif (strlen($utr) < 6 || strlen($utr) > 80) {
         $statusMessage = 'Please enter a valid payment reference/UTR.';
         $statusClass = 'error';
     } else {
-        $dupStmt = $conn->prepare('SELECT id FROM thevani WHERE ullekha = ? LIMIT 1');
+        $dupStmt = $conn->prepare('SELECT shonu FROM thevani WHERE ullekha = ? LIMIT 1');
         $duplicate = false;
         if ($dupStmt) {
             $dupStmt->bind_param('s', $utr);
@@ -176,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
       <h2>Submit payment reference</h2>
       <div class="label">Amount (minimum <?= qr_page_escape(number_format($minimum, 2)) ?> <?= qr_page_escape($unit) ?>)</div>
       <form method="post">
-        <input type="number" name="amount" min="<?= qr_page_escape((string)$minimum) ?>" max="50000" step="0.01" value="<?= qr_page_escape(number_format($amount, 2, '.', '')) ?>" required>
+        <input type="number" name="amount" min="<?= qr_page_escape((string)$minimum) ?>" max="<?= qr_page_escape((string)$maximum) ?>" step="0.01" value="<?= qr_page_escape(number_format($amount, 2, '.', '')) ?>" required>
         <div class="label">UTR / transaction hash</div>
         <input type="text" name="utr" minlength="6" maxlength="80" placeholder="Enter payment reference" required>
         <button type="submit">Submit Deposit Request</button>
