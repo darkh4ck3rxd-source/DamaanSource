@@ -53,9 +53,14 @@
 					$sesnum = mysqli_num_rows($sesresult);
 					if($sesnum == 1){
 						$samatolana = ($pageNo - 1) * 10;
-						$shonuid = $data_auth['payload']['id'];
-						
-						if($endDate == '' && $startDate == ''){
+							$shonuid = $data_auth['payload']['id'];
+
+							// Expire unverified deposit orders after ten minutes.
+							// Status 0 = pending, 1 = completed, 4 = failed.
+							$expireSql = "UPDATE thevani SET sthiti = '4' WHERE balakedara = " . (int)$shonuid . " AND sthiti = '0' AND dinankavannuracisi <= DATE_SUB(NOW(), INTERVAL 10 MINUTE)";
+							$conn->query($expireSql);
+
+							if($endDate == '' && $startDate == ''){
 							if($state == -1){
 								$samasye = "SELECT dharavahi, dinankavannuracisi, madari, motta, sthiti, pavatiaidi, mula
 								  FROM thevani WHERE balakedara = $shonuid
