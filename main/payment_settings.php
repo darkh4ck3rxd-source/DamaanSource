@@ -18,6 +18,8 @@ $defaults = [
     'wake_min_amount' => '200',
     'paytm_upi_id' => '',
     'paytm_upi_name' => 'Jalwa',
+    'phonepe_upi_id' => '',
+    'phonepe_upi_name' => 'Jalwa',
     'usdt_qr' => '',
     'usdt_address' => '',
     'usdt_network' => 'TRC20',
@@ -51,7 +53,7 @@ function uploaded_qr_data_uri(string $field): ?string {
 $message = '';
 $messageType = 'success';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $textFields = ['wake_upi_id', 'wake_min_amount', 'paytm_upi_id', 'paytm_upi_name', 'usdt_address', 'usdt_network', 'usdt_min_amount'];
+    $textFields = ['wake_upi_id', 'wake_min_amount', 'paytm_upi_id', 'paytm_upi_name', 'phonepe_upi_id', 'phonepe_upi_name', 'usdt_address', 'usdt_network', 'usdt_min_amount'];
     foreach ($textFields as $field) {
         $value = trim((string)($_POST[$field] ?? ''));
         if (in_array($field, ['wake_min_amount', 'usdt_min_amount'], true)) {
@@ -127,6 +129,12 @@ function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <p class="help">The UPI-PayTM deposit option opens Paytm directly with the selected amount. The order ID is sent as the UPI remark/reference.</p>
           <label>Paytm UPI ID / VPA</label><input class="form-control" type="text" name="paytm_upi_id" value="<?= h($settings['paytm_upi_id']) ?>" placeholder="example@ptyes">
           <label>Payee name shown in Paytm</label><input class="form-control" type="text" name="paytm_upi_name" value="<?= h($settings['paytm_upi_name']) ?>" placeholder="Jalwa">
+        </div>
+        <div class="qr-card">
+          <h4>PhonePe UPI Intent</h4>
+          <p class="help">UPI_PHONEPE and UPI_PHONEPAY both open PhonePe with the selected amount and numeric order ID in the remark.</p>
+          <label>PhonePe UPI ID / VPA</label><input class="form-control" type="text" name="phonepe_upi_id" value="<?= h($settings['phonepe_upi_id']) ?>" placeholder="example@ybl">
+          <label>Payee name shown in PhonePe</label><input class="form-control" type="text" name="phonepe_upi_name" value="<?= h($settings['phonepe_upi_name']) ?>" placeholder="Jalwa">
         </div>
         <div class="qr-card">
           <h4>USDT</h4>

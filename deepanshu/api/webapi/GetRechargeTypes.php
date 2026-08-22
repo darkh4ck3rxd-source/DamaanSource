@@ -453,17 +453,53 @@
 								'sort' => 90000,
 							];
 						}
-						// Route all UPI-like channels to the configurable UPI QR page and
-						// the USDT channel to the configurable USDT QR page. The dummy
-						// tyid keeps the existing frontend query builder on its ampersand
-						// branch instead of producing two question marks.
-						$qrMethod = ($payid === 11) ? 'usdt' : 'upi';
-						if (!empty($data['rechargetypelist']) && is_array($data['rechargetypelist'])) {
-							foreach ($data['rechargetypelist'] as &$rechargeType) {
-								$rechargeType['paySendUrl'] = $sites . '/pay/qrpay.php?method=' . $qrMethod . '&tyid=0';
+							// UPI_PHONEPE and UPI_PHONEPAY each use the same PhonePe intent
+							// page but keep separate channel names and numeric order records.
+							if ((int)$payid === 1 || (int)$payid === 14) {
+								$phoneChannel = ((int)$payid === 14) ? 'UPI_PHONEPAY' : 'UPI_PHONEPE';
+								$phoneTypeId = ((int)$payid === 14) ? 2194 : 2193;
+								$data['rechargetypelist'] = [[
+									'payTypeID' => $phoneTypeId,
+									'payID' => (int)$payid,
+									'payName' => $phoneChannel,
+									'paySysName' => 'PhonePe',
+									'miniPrice' => 200,
+									'maxPrice' => 50000,
+									'scope' => '200|500|1000|5000|10000|50000',
+									'paySendUrl' => $sites . '/pay/phonepe_upi.php?channel=' . $phoneChannel . '&tyid=0',
+									'parameters' => '',
+									'startTime' => '00:00',
+									'endTime' => '24:00',
+									'rechargeRifts' => 0.0,
+									'c2cUnitAmount' => null,
+									'quickConfig' => '',
+									'quickConfigList' => [
+										['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 5000.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 10000.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 50000.0, 'giftAmount' => 0.0],
+									],
+									'random' => 0.8192269882695508,
+									'sort' => 90000,
+								]];
+							} elseif ((int)$payid === 13) {
+								foreach ($data['rechargetypelist'] as &$rechargeType) {
+									$rechargeType['paySendUrl'] = $sites . '/pay/paytm_upi.php?tyid=0';
+								}
+								unset($rechargeType);
+							} elseif ((int)$payid === 11) {
+								foreach ($data['rechargetypelist'] as &$rechargeType) {
+									$rechargeType['paySendUrl'] = $sites . '/pay/qrpay.php?method=usdt&tyid=0';
+								}
+								unset($rechargeType);
+							} else {
+								foreach ($data['rechargetypelist'] as &$rechargeType) {
+									$rechargeType['paySendUrl'] = $sites . '/pay/qrpay.php?method=upi&tyid=0';
+								}
+								unset($rechargeType);
 							}
-							unset($rechargeType);
-						}
 						$data['banklist'] = null;
 						$data['localUsdtlist'] = null;
 						$data['thirdPayBankList'] = null;
