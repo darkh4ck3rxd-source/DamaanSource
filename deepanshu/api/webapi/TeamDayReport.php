@@ -1741,10 +1741,24 @@
 							}
 						}
 																														
-                            // Apply admin-managed Subordinate Data overrides after the calculated values.
+                            // Apply selected-date admin overrides after calculated values; legacy overrides remain a fallback.
                             $overrideTable = $conn->query("SHOW TABLES LIKE 'subordinate_metric_overrides'");
                             if ($overrideTable && $overrideTable->num_rows > 0) {
+                                $dateColumn = $conn->query("SHOW COLUMNS FROM subordinate_metric_overrides LIKE 'metric_date'");
+                                if (!$dateColumn || $dateColumn->num_rows === 0) {
+                                    $conn->query("ALTER TABLE subordinate_metric_overrides ADD COLUMN metric_date DATE NOT NULL DEFAULT '1000-01-01' AFTER user_id");
+                                }
+                                $legacyIndex = $conn->query("SHOW INDEX FROM subordinate_metric_overrides WHERE Key_name = 'subordinate_user_metric'");
+                                if ($legacyIndex && $legacyIndex->num_rows > 0) {
+                                    $conn->query("ALTER TABLE subordinate_metric_overrides DROP INDEX subordinate_user_metric");
+                                }
+                                $dateIndex = $conn->query("SHOW INDEX FROM subordinate_metric_overrides WHERE Key_name = 'subordinate_user_metric_date'");
+                                if (!$dateIndex || $dateIndex->num_rows === 0) {
+                                    $conn->query("ALTER TABLE subordinate_metric_overrides ADD UNIQUE KEY subordinate_user_metric_date (user_id, metric_key, metric_date)");
+                                }
                                 $summaryTargetId = ($shonupost['userId'] === '') ? (int)$shonuid : (int)$shonupost['userId'];
+                                $overrideDate = date('Y-m-d', strtotime($day));
+                                $legacyMetricDate = '1000-01-01';
                                 $summaryKeys = [
                                     'summary_recharge_count' => 'recahrgeCount',
                                     'summary_recharge_amount' => 'recahrgeAmountSum',
@@ -1753,9 +1767,9 @@
                                     'summary_first_recharge_count' => 'firstRecahrgeCount',
                                     'summary_first_recharge_amount' => 'firstRecahrgeAmountSum'
                                 ];
-                                $summaryStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ?');
+                                $summaryStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_date IN (?, ?) AND metric_key LIKE \'summary_%\' ORDER BY metric_date ASC');
                                 if ($summaryStmt) {
-                                    $summaryStmt->bind_param('i', $summaryTargetId);
+                                    $summaryStmt->bind_param('iss', $summaryTargetId, $legacyMetricDate, $overrideDate);
                                     $summaryStmt->execute();
                                     $summaryResult = $summaryStmt->get_result();
                                     while ($summaryRow = $summaryResult->fetch_assoc()) {
@@ -1768,14 +1782,14 @@
                                 }
 
                                 if (!empty($data['list'])) {
-                                    $rowStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_key IN (\'level\', \'deposit_amount\', \'commission\')');
+                                    $rowStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_date IN (?, ?) AND metric_key IN (\'level\', \'deposit_amount\', \'commission\') ORDER BY metric_date ASC');
                                     if ($rowStmt) {
                                         foreach ($data['list'] as &$agencyRow) {
                                             $rowUserId = (int)($agencyRow['userID'] ?? 0);
                                             if ($rowUserId < 1) {
                                                 continue;
                                             }
-                                            $rowStmt->bind_param('i', $rowUserId);
+                                            $rowStmt->bind_param('iss', $rowUserId, $legacyMetricDate, $overrideDate);
                                             $rowStmt->execute();
                                             $rowResult = $rowStmt->get_result();
                                             while ($rowOverride = $rowResult->fetch_assoc()) {
