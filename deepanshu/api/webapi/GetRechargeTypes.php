@@ -398,12 +398,12 @@
                                            
                             $data["rechargetypelist"]["1"]["payTypeID"] = (int)"2192";
                             $data["rechargetypelist"]["1"]["payID"] = (int)"11";
-                            $data["rechargetypelist"]["1"]["payName"] = "UPI-PayTM";
+                            $data["rechargetypelist"]["1"]["payName"] = "PAYTM_UPI";
                             $data["rechargetypelist"]["1"]["paySysName"] = "825";
                             $data["rechargetypelist"]["1"]["miniPrice"] = (int)"200";
                             $data["rechargetypelist"]["1"]["maxPrice"] = (int)"50000";
                             $data["rechargetypelist"]["1"]["scope"] = "500|1000|2500|5000|10000";
-                            $data["rechargetypelist"]["1"]["paySendUrl"] = $sites."/pay/arkpay.php";
+                            $data["rechargetypelist"]["1"]["paySendUrl"] = $sites."/pay/paytm_upi.php";
                             $data["rechargetypelist"]["1"]["parameters"] = '';
                             $data["rechargetypelist"]["1"]["startTime"] = "01:00";
                             $data["rechargetypelist"]["1"]["endTime"] = "23:00";

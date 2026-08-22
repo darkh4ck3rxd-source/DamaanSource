@@ -71,14 +71,14 @@ $data['typelist'][1]['minPrice'] = 200;
 						
 						$data['typelist'][2]['payID'] = 13;
 						$data['typelist'][2]['payTypeID'] = 0;
-						$data['typelist'][2]['payName'] = 'UPI-PayTM';
+						$data['typelist'][2]['payName'] = 'PAYTM_UPI';
 						$data['typelist'][2]['paySysName'] = 'USDT';
 						$data['typelist'][2]['payNameUrl'] = 'https://pub-628304d7b25d454abf303bfafba6a2e0.r2.dev/ALADDINN/payNameIcon/payNameIcon_20241001160501fwkx.png';
 						$data['typelist'][2]['payNameUrl2'] = 'https://pub-628304d7b25d454abf303bfafba6a2e0.r2.dev/ALADDINN/payNameIcon/payNameIcon_20241001160501fwkx.png';
 $data['typelist'][2]['minPrice'] = 200;
 							$data['typelist'][2]['maxPrice'] = 50000;
 							$data['typelist'][2]['scope'] = '200|500|1000|5000|10000|50000';
-						$data['typelist'][2]['typeName'] = 'UPI-PayTM';
+						$data['typelist'][2]['typeName'] = 'PAYTM_UPI';
 						$data['typelist'][2]['typeNameCode'] = 9205;
 						$data['typelist'][2]['maxRechargeRifts'] = 0.00;
 						$data['typelist'][2]['sort'] = 5;

@@ -16,6 +16,8 @@ $defaults = [
     'wake_upi_qr' => '',
     'wake_upi_id' => '',
     'wake_min_amount' => '200',
+    'paytm_upi_id' => '',
+    'paytm_upi_name' => 'Jalwa',
     'usdt_qr' => '',
     'usdt_address' => '',
     'usdt_network' => 'TRC20',
@@ -49,7 +51,7 @@ function uploaded_qr_data_uri(string $field): ?string {
 $message = '';
 $messageType = 'success';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $textFields = ['wake_upi_id', 'wake_min_amount', 'usdt_address', 'usdt_network', 'usdt_min_amount'];
+    $textFields = ['wake_upi_id', 'wake_min_amount', 'paytm_upi_id', 'paytm_upi_name', 'usdt_address', 'usdt_network', 'usdt_min_amount'];
     foreach ($textFields as $field) {
         $value = trim((string)($_POST[$field] ?? ''));
         if (in_array($field, ['wake_min_amount', 'usdt_min_amount'], true)) {
@@ -119,6 +121,12 @@ function h(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <label>Or hosted Wake UPI QR URL</label><input class="form-control" type="url" name="wake_upi_qr_url" value="<?= h(str_starts_with($settings['wake_upi_qr'], 'data:') ? '' : $settings['wake_upi_qr']) ?>" placeholder="https://.../wake-upi-qr.png">
           <label>Wake UPI ID</label><input class="form-control" type="text" name="wake_upi_id" value="<?= h($settings['wake_upi_id']) ?>" placeholder="example@upi">
           <label>Minimum Wake UPI amount</label><input class="form-control" type="number" min="1" name="wake_min_amount" value="<?= h($settings['wake_min_amount']) ?>">
+        </div>
+        <div class="qr-card">
+          <h4>Paytm UPI Intent</h4>
+          <p class="help">The UPI-PayTM deposit option opens Paytm directly with the selected amount. The order ID is sent as the UPI remark/reference.</p>
+          <label>Paytm UPI ID / VPA</label><input class="form-control" type="text" name="paytm_upi_id" value="<?= h($settings['paytm_upi_id']) ?>" placeholder="example@ptyes">
+          <label>Payee name shown in Paytm</label><input class="form-control" type="text" name="paytm_upi_name" value="<?= h($settings['paytm_upi_name']) ?>" placeholder="Jalwa">
         </div>
         <div class="qr-card">
           <h4>USDT</h4>
