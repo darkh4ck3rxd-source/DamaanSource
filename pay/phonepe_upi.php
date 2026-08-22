@@ -171,8 +171,11 @@ if ($error === '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
         }
         if ($error === '') {
             $remark = 'Order ID ' . $orderId;
-            $phonepeUrl = 'phonepe://pay?pa=' . rawurlencode($payeeVpa) . '&pn=' . rawurlencode($payeeName) . '&am=' . rawurlencode($amountText) . '&cu=INR&tn=' . rawurlencode($remark) . '&tr=' . rawurlencode($orderId);
+            // Use the standard UPI deep link for PhonePe as well. The old phonepe://pay
+            // scheme can show an error after a successful payment when the receiver is a
+            // non-PhonePe VPA (for example, a Paytm QR VPA).
             $upiUrl = 'upi://pay?pa=' . rawurlencode($payeeVpa) . '&pn=' . rawurlencode($payeeName) . '&am=' . rawurlencode($amountText) . '&cu=INR&tn=' . rawurlencode($remark) . '&tr=' . rawurlencode($orderId);
+            $phonepeUrl = $upiUrl;
         }
     }
 }
@@ -211,7 +214,7 @@ if ($error === '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
       <p class="muted">Your PhonePe payment is ready. The amount is fixed and the order ID is already added in the payment remark.</p>
       <div class="amount">₹<?= phonepe_page_escape(number_format($amount, 2)) ?></div>
       <div class="label">Order ID / Remark</div><div class="order"><?= phonepe_page_escape($orderId) ?></div>
-      <a id="paytmButton" class="button" href="<?= phonepe_page_escape($phonepeUrl) ?>">Open PhonePe</a>
+      <a id="phonepeButton" class="button" href="<?= phonepe_page_escape($phonepeUrl) ?>">Open PhonePe</a>
       <a class="button secondary" href="<?= phonepe_page_escape($upiUrl) ?>">Open another UPI app</a>
       <button id="paymentDone" class="button confirm" type="button">Payment Done?</button>
       <div id="utrSection" class="utr-section" hidden>
