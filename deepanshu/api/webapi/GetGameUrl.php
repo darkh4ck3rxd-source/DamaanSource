@@ -39,9 +39,9 @@ if (!$requiredFieldsPresent) {
 }
 
 // The web client signs the complete request data after sorting keys and
-// excluding only signature/track/xosoBettingData. Keep numeric zero values.
+// excluding fields added outside the signed payload. Keep numeric zero values.
 $signedPayload = $body;
-foreach (['signature', 'track', 'xosoBettingData'] as $excludedKey) {
+foreach (['signature', 'track', 'xosoBettingData', 'timestamp'] as $excludedKey) {
     unset($signedPayload[$excludedKey]);
 }
 foreach ($signedPayload as $key => $value) {
