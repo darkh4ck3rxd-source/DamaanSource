@@ -75,7 +75,7 @@ if (!$user) {
     }
 }
 
-$minimum = max(1, (float)phonepe_setting($conn, 'paytm_min_amount', '200'));
+$minimum = 100.0;
 $maximum = 50000.0;
 $payeeVpa = trim(phonepe_setting($conn, 'phonepe_upi_id'));
 if ($payeeVpa === '') {

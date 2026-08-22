@@ -460,11 +460,11 @@
 								$data['rechargetypelist'] = [[
 									'payTypeID' => $phoneTypeId,
 									'payID' => (int)$payid,
-									'payName' => $phoneChannel,
+'payName' => $phoneChannel,
 									'paySysName' => 'PhonePe',
-									'miniPrice' => 200,
+									'miniPrice' => 100,
 									'maxPrice' => 50000,
-									'scope' => '200|500|1000|5000|10000|50000',
+									'scope' => '100|200|500|1000|5000|10000|50000',
 									'paySendUrl' => $sites . '/pay/phonepe_upi.php?channel=' . $phoneChannel . '&tyid=0',
 									'parameters' => '',
 									'startTime' => '00:00',
@@ -473,6 +473,7 @@
 									'c2cUnitAmount' => null,
 									'quickConfig' => '',
 									'quickConfigList' => [
+										['rechargeAmount' => 100.0, 'giftAmount' => 0.0],
 										['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
 										['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
 										['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
@@ -484,9 +485,20 @@
 									'sort' => 90000,
 								]];
 							} elseif ((int)$payid === 13) {
-								foreach ($data['rechargetypelist'] as &$rechargeType) {
-									$rechargeType['paySendUrl'] = $sites . '/pay/paytm_upi.php?tyid=0';
-								}
+									foreach ($data['rechargetypelist'] as &$rechargeType) {
+										$rechargeType['miniPrice'] = 100;
+										$rechargeType['scope'] = '100|200|500|1000|5000|10000|50000';
+										$rechargeType['quickConfigList'] = [
+											['rechargeAmount' => 100.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 5000.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 10000.0, 'giftAmount' => 0.0],
+											['rechargeAmount' => 50000.0, 'giftAmount' => 0.0],
+										];
+										$rechargeType['paySendUrl'] = $sites . '/pay/paytm_upi.php?tyid=0';
+									}
 								unset($rechargeType);
 							} elseif ((int)$payid === 11) {
 								foreach ($data['rechargetypelist'] as &$rechargeType) {
