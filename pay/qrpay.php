@@ -103,6 +103,7 @@ if ($user && $method === 'upi') {
     }
 }
 $upiIntentUrl = '';
+$dynamicQrUrl = '';
 if ($method === 'upi' && $account !== '' && $paymentOrderId !== '') {
     $intentAmount = number_format($amount, 2, '.', '');
     $intentOrder = rawurlencode($paymentOrderId);
@@ -113,6 +114,9 @@ if ($method === 'upi' && $account !== '' && $paymentOrderId !== '') {
         . '&transactionDescription=' . $intentOrder
         . '&tid=' . $intentOrder
         . '&tr=' . $intentOrder;
+    // Build a fresh QR for this exact amount and order. The configured image remains
+    // available as a fallback if the QR image service is temporarily unavailable.
+    $dynamicQrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=10&ecc=Q&data=' . rawurlencode($upiIntentUrl);
 }
 
 // A signed timer cookie prevents refresh/tampering from extending the five-minute window.
@@ -241,6 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     .locked-note { color:#9fa9d0; font-size:12px; margin-top:6px; }
     .upi-pay { display:flex; align-items:center; justify-content:center; gap:12px; background:#19d9c1; color:#03113c; text-decoration:none; border-radius:12px; padding:13px 15px; margin-top:16px; font-size:17px; font-weight:700; }
     .upi-pay img { width:34px; height:34px; object-fit:contain; border-radius:7px; background:#fff; }
+    .qr-caption { text-align:center; color:#9fa9d0; font-size:12px; margin-top:-10px; }
   </style>
 </head>
 <body>
@@ -251,7 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
       <p class="muted">Scan the QR, complete the payment, then submit the payment reference below. Your wallet will be updated after verification.</p>
       <?php if ($statusMessage !== ''): ?><div class="notice <?= qr_page_escape($statusClass) ?>"><?= qr_page_escape($statusMessage) ?></div><?php endif; ?>
       <?php if ($timerValid && $user): ?><div id="expiryTimer" class="timer" data-expires="<?= (int)$expiresAt ?>"><span>Payment page expires in</span><strong>05:00</strong></div><?php endif; ?>
-      <?php if ($qr !== ''): ?><img class="qr" src="<?= qr_page_escape($qr) ?>" alt="<?= qr_page_escape($title) ?> QR code"><?php else: ?><div class="empty">Admin has not configured this QR yet. Please contact support.</div><?php endif; ?>
+      <?php if ($method === 'upi' && $dynamicQrUrl !== ''): ?>
+        <img class="qr" src="<?= qr_page_escape($dynamicQrUrl) ?>" alt="Dynamic <?= qr_page_escape($title) ?> QR code"<?php if ($qr !== ''): ?> data-fallback-src="<?= qr_page_escape($qr) ?>" onerror="if(this.dataset.fallbackSrc && this.src !== this.dataset.fallbackSrc){this.src=this.dataset.fallbackSrc;this.nextElementSibling.textContent='Showing the configured fallback QR.';}"<?php endif; ?>>
+        <div class="qr-caption">Dynamic QR generated for this amount and order ID.</div>
+      <?php elseif ($qr !== ''): ?>
+        <img class="qr" src="<?= qr_page_escape($qr) ?>" alt="<?= qr_page_escape($title) ?> QR code">
+      <?php else: ?><div class="empty">Admin has not configured this QR yet. Please contact support.</div><?php endif; ?>
       <?php if ($account !== ''): ?><div class="label"><?= $method === 'usdt' ? 'Wallet address (' . qr_page_escape($network) . ')' : 'UPI ID' ?></div><div class="value"><?= qr_page_escape($account) ?></div><?php endif; ?>
       <?php if ($method === 'upi' && $upiIntentUrl !== '' && !$pageExpired): ?>
         <a class="upi-pay" href="<?= qr_page_escape($upiIntentUrl) ?>"><img src="/assets/png/expert-upi-qr.png" alt="UPI"><span>Pay Via UPI</span></a>
