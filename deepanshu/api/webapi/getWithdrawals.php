@@ -1,6 +1,7 @@
 <?php
 	include "../../conn.php";
 	include "../../functions2.php";
+	require_once __DIR__ . '/../../../wager_functions.php';
 
 	header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
@@ -219,6 +220,16 @@ $data["withdrawalsrule"]["amount"] = $balarr["motta"];
  					   }
    					 $data["withdrawalsrule"]["amountofCode"] = (int)"0";
 						}
+
+				// Keep the website requirement synchronized with Admin Wager Management.
+				$wagerSummary = get_wager_summary($conn, (int)$shonuid);
+				$requiredWager = round((float)$wagerSummary['required'], 2);
+				$data["withdrawalsrule"]["amountofCode"] = $requiredWager;
+				if ($requiredWager > 0 || (float)$wagerSummary['completedDeposits'] <= 0) {
+					$wiwo = 0;
+				} else {
+					$wiwo = $balarr["motta"] ?? 0;
+				}
 
 				// Additional Data Assignments
 				$data["withdrawalsrule"]["canWithdrawAmount"] = $wiwo;

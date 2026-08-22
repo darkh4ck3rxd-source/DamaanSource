@@ -87,7 +87,10 @@ ensure_wager_adjustments_table($conn);
                 <div id="user-card" class="wager-user">
                   <div><strong>UID:</strong> <span id="user-uid"></span></div>
                   <div><strong>Mobile:</strong> <span id="user-mobile"></span></div>
-                  <div><strong>Current manual wager:</strong> <span class="current" id="user-current">₹0.00</span></div>
+                  <div><strong>Current required wager:</strong> <span class="current" id="user-current">₹0.00</span></div>
+                  <div><strong>Normal remaining wager:</strong> <span id="user-normal">₹0.00</span></div>
+                  <div><strong>Manual adjustment:</strong> <span id="user-manual">₹0.00</span></div>
+                  <div class="text-muted small mt-2">Completed deposits: ₹<span id="user-deposits">0.00</span> · Investments: ₹<span id="user-investments">0.00</span> · Total bets: ₹<span id="user-bets">0.00</span></div>
                 </div>
                 <form id="adjust-form" autocomplete="off" style="display:none;">
                   <input type="hidden" id="adjust-uid" name="uid">
@@ -161,13 +164,18 @@ ensure_wager_adjustments_table($conn);
         $('adjust-uid').value = user.id;
         $('user-uid').textContent = user.id;
         $('user-mobile').textContent = user.mobile || '-';
-        $('user-current').textContent = '₹' + user.currentManualAdjustment;
+        $('user-current').textContent = '₹' + user.currentRequiredWager;
+        $('user-normal').textContent = '₹' + user.normalRequiredWager;
+        $('user-manual').textContent = '₹' + user.currentManualAdjustment;
+        $('user-deposits').textContent = user.completedDeposits;
+        $('user-investments').textContent = user.investments;
+        $('user-bets').textContent = user.totalBets;
       };
       const lookup = async (uid, quiet) => {
         if (!/^\d+$/.test(uid) || Number(uid) < 1) throw new Error('Enter a valid UID');
         const payload = await request({action: 'lookup', uid: uid});
         showUser(payload.user);
-        if (!quiet) status('User found. Current manual wager: ₹' + payload.user.currentManualAdjustment, false);
+        if (!quiet) status('User found. Current required wager: ₹' + payload.user.currentRequiredWager, false);
         return payload.user;
       };
       const loadHistory = async () => {
@@ -190,7 +198,7 @@ ensure_wager_adjustments_table($conn);
         const amount = $('amount').value.trim();
         if (!uid) throw new Error('Look up a UID first');
         const payload = await request({action: 'adjust', uid: uid, amount: amount, operation: operation, note: $('note').value.trim()});
-        status(payload.message + '. Current manual wager: ₹' + Number(payload.current).toFixed(2), false);
+        status(payload.message + '. Current required wager: ₹' + Number(payload.requiredWager || payload.current).toFixed(2), false);
         $('amount').value = '';
         $('note').value = '';
         await lookup(uid, true);

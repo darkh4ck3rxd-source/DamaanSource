@@ -35,7 +35,13 @@ if ($action === 'lookup') {
         wager_json(['ok' => false, 'message' => 'UID not found'], 404);
     }
 
-    $user['currentManualAdjustment'] = number_format(get_wager_adjustment($conn, (int) $uid), 2, '.', '');
+    $summary = get_wager_summary($conn, (int) $uid);
+    $user['currentManualAdjustment'] = number_format($summary['manualAdjustment'], 2, '.', '');
+    $user['normalRequiredWager'] = number_format($summary['normalRequired'], 2, '.', '');
+    $user['currentRequiredWager'] = number_format($summary['required'], 2, '.', '');
+    $user['completedDeposits'] = number_format($summary['completedDeposits'], 2, '.', '');
+    $user['investments'] = number_format($summary['investments'], 2, '.', '');
+    $user['totalBets'] = number_format($summary['totalBets'], 2, '.', '');
     wager_json(['ok' => true, 'user' => $user]);
 }
 
@@ -60,6 +66,11 @@ if ($action === 'adjust') {
         (string) $_SESSION['unohs'],
         $note
     );
+    if ($result['ok']) {
+        $summary = get_wager_summary($conn, (int) $uid);
+        $result['requiredWager'] = number_format($summary['required'], 2, '.', '');
+        $result['manualAdjustment'] = number_format($summary['manualAdjustment'], 2, '.', '');
+    }
     wager_json($result, $result['ok'] ? 200 : 422);
 }
 

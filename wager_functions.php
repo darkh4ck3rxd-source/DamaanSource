@@ -1,10 +1,9 @@
 <?php
 /**
- * Shared UID-based manual wager adjustment helpers.
+ * Shared UID-based manual wager adjustment and requirement helpers.
  *
- * Adjustments are append-only: an Add writes a positive delta and a Remove
- * writes a negative delta. The running manual adjustment is never allowed to
- * become negative, so Remove cannot erase the user’s ordinary wager rule.
+ * The website and admin panel must use the same formula:
+ * completed deposits + investments + manual adjustment - total bets.
  */
 function ensure_wager_adjustments_table(mysqli $conn): bool
 {
@@ -41,6 +40,66 @@ function get_wager_adjustment(mysqli $conn, int $userid): float
     $stmt->close();
 
     return max(0.0, (float) ($row['adjustment'] ?? 0));
+}
+
+function wager_sum(mysqli $conn, string $table, string $userColumn, string $amountColumn, int $userid, string $extraWhere = ''): float
+{
+    // Table and column names come only from the fixed internal lists below.
+    $sql = "SELECT COALESCE(SUM(`{$amountColumn}`), 0) AS total FROM `{$table}` WHERE `{$userColumn}` = ?" . $extraWhere;
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        return 0.0;
+    }
+    $stmt->bind_param('i', $userid);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return 0.0;
+    }
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return (float) ($row['total'] ?? 0);
+}
+
+function get_wager_summary(mysqli $conn, int $userid): array
+{
+    $completedDeposits = wager_sum($conn, 'thevani', 'balakedara', 'motta', $userid, " AND `sthiti` = '1'");
+    $investments = wager_sum($conn, 'hodike_balakedara', 'userkani', 'price', $userid);
+
+    $betTables = [
+        'bajikattuttate',
+        'bajikattuttate_trx',
+        'bajikattuttate_trx3',
+        'bajikattuttate_trx5',
+        'bajikattuttate_trx10',
+        'bajikattuttate_drei',
+        'bajikattuttate_funf',
+        'bajikattuttate_zehn',
+        'bajikattuttate_kemuru',
+        'bajikattuttate_kemuru_drei',
+        'bajikattuttate_kemuru_funf',
+        'bajikattuttate_kemuru_zehn',
+        'bajikattuttate_aidudi',
+        'bajikattuttate_aidudi_drei',
+        'bajikattuttate_aidudi_funf',
+        'bajikattuttate_aidudi_zehn',
+    ];
+    $totalBets = 0.0;
+    foreach ($betTables as $table) {
+        $totalBets += wager_sum($conn, $table, 'byabaharkarta', 'ketebida', $userid);
+    }
+
+    $manualAdjustment = get_wager_adjustment($conn, $userid);
+    $normalRequired = max(0.0, $completedDeposits + $investments - $totalBets);
+    $required = max(0.0, $completedDeposits + $investments + $manualAdjustment - $totalBets);
+
+    return [
+        'completedDeposits' => $completedDeposits,
+        'investments' => $investments,
+        'totalBets' => $totalBets,
+        'manualAdjustment' => $manualAdjustment,
+        'normalRequired' => $normalRequired,
+        'required' => $required,
+    ];
 }
 
 function find_wager_user(mysqli $conn, int $userid): ?array
