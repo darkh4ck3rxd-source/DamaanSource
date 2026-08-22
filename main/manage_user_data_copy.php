@@ -116,11 +116,13 @@ $columns = array(
                 '<a href="javascript:void(0);" onClick="delete_row(' . $id . ')" class="update-person" style="color:#f56954; font-size:16px;" title="Delete"><i class="fa fa-trash"></i></a>
                 &nbsp;
                 <a href="javascript:void(0);" onClick="Respond(' . $id . ')" class="update-person" style="color:#090; font-size:16px;" data-toggle="tooltip" title="Publish"><i class="fa fa-check-square-o"></i></a>
-                <a href="user-details.php?user=' . $id . '"  class="update-person" style="color:#0E0E44; font-size:16px;" data-toggle="tooltip" title="User Detail"><i class="fa fa-info"></i></a>' :
+                <a href="user-details.php?user=' . $id . '"  class="update-person" style="color:#0E0E44; font-size:16px;" data-toggle="tooltip" title="User Detail"><i class="fa fa-info"></i></a>
+                &nbsp;<a href="subordinate_metrics.php?parent=' . $id . '" class="update-person" style="color:#2563eb; font-size:16px;" data-toggle="tooltip" title="Edit Agency and subordinate data"><i class="fa fa-bar-chart"></i></a>' :
                 '<a href="javascript:void(0);" onClick="delete_row(' . $id . ')" class="update-person" style="color:#f56954; font-size:16px;" title="Delete"><i class="fa fa-trash"></i></a>
                 &nbsp;
                 <a href="javascript:void(0);" onClick="UnRespond(' . $id . ')" class="update-person" style="color:#f00; font-size:16px;" data-toggle="tooltip" title="Unpublish"><i class="fa fa-square-o"></i></a>
-                <a href="user-details.php?user=' . $id . '"  class="update-person" style="color:#0E0E44; font-size:16px;" data-toggle="tooltip" title="User Detail"><i class="fa fa-info"></i></a>';
+                <a href="user-details.php?user=' . $id . '"  class="update-person" style="color:#0E0E44; font-size:16px;" data-toggle="tooltip" title="User Detail"><i class="fa fa-info"></i></a>
+                &nbsp;<a href="subordinate_metrics.php?parent=' . $id . '" class="update-person" style="color:#2563eb; font-size:16px;" data-toggle="tooltip" title="Edit Agency and subordinate data"><i class="fa fa-bar-chart"></i></a>';
         }
     ),
     array('db' => 'pwd', 'dt' => 9),

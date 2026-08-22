@@ -187,7 +187,7 @@
 			</div>
           <div class="row">
             <div class="col-sm-12 mb-4 mb-xl-0">
-              <h4 class="font-weight-bold text-dark">User Details</h4>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><h4 class="font-weight-bold text-dark">User Details</h4><a href="subordinate_metrics.php?parent=<?= (int)$userid; ?>" class="cool-button" style="background:#2563eb;color:#fff;text-decoration:none">Edit Agency &amp; Subordinate Data</a></div>
             </div>
           </div> 		  		  		  			
 		  <div class="row">

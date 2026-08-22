@@ -1741,8 +1741,61 @@
 							}
 						}
 																														
-						$res['data'] = $data;
-						$res['code'] = 0;
+                            // Apply admin-managed Subordinate Data overrides after the calculated values.
+                            $overrideTable = $conn->query("SHOW TABLES LIKE 'subordinate_metric_overrides'");
+                            if ($overrideTable && $overrideTable->num_rows > 0) {
+                                $summaryTargetId = ($shonupost['userId'] === '') ? (int)$shonuid : (int)$shonupost['userId'];
+                                $summaryKeys = [
+                                    'summary_recharge_count' => 'recahrgeCount',
+                                    'summary_recharge_amount' => 'recahrgeAmountSum',
+                                    'summary_bet_count' => 'betCountSum',
+                                    'summary_bet_amount' => 'betAmountSum',
+                                    'summary_first_recharge_count' => 'firstRecahrgeCount',
+                                    'summary_first_recharge_amount' => 'firstRecahrgeAmountSum'
+                                ];
+                                $summaryStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ?');
+                                if ($summaryStmt) {
+                                    $summaryStmt->bind_param('i', $summaryTargetId);
+                                    $summaryStmt->execute();
+                                    $summaryResult = $summaryStmt->get_result();
+                                    while ($summaryRow = $summaryResult->fetch_assoc()) {
+                                        $summaryKey = (string)$summaryRow['metric_key'];
+                                        if (isset($summaryKeys[$summaryKey])) {
+                                            $data['data'][$summaryKeys[$summaryKey]] = (float)$summaryRow['metric_value'];
+                                        }
+                                    }
+                                    $summaryStmt->close();
+                                }
+
+                                if (!empty($data['list'])) {
+                                    $rowStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_key IN (\'level\', \'deposit_amount\', \'commission\')');
+                                    if ($rowStmt) {
+                                        foreach ($data['list'] as &$agencyRow) {
+                                            $rowUserId = (int)($agencyRow['userID'] ?? 0);
+                                            if ($rowUserId < 1) {
+                                                continue;
+                                            }
+                                            $rowStmt->bind_param('i', $rowUserId);
+                                            $rowStmt->execute();
+                                            $rowResult = $rowStmt->get_result();
+                                            while ($rowOverride = $rowResult->fetch_assoc()) {
+                                                if ($rowOverride['metric_key'] === 'level') {
+                                                    $agencyRow['lv'] = (int)$rowOverride['metric_value'];
+                                                } elseif ($rowOverride['metric_key'] === 'deposit_amount') {
+                                                    $agencyRow['rechargeAmount'] = (float)$rowOverride['metric_value'];
+                                                } elseif ($rowOverride['metric_key'] === 'commission') {
+                                                    $agencyRow['rebateAmount'] = (float)$rowOverride['metric_value'];
+                                                }
+                                            }
+                                        }
+                                        unset($agencyRow);
+                                        $rowStmt->close();
+                                    }
+                                }
+                            }
+
+							$res['data'] = $data;
+							$res['code'] = 0;
 						$res['msg'] = 'Succeed';
 						$res['msgCode'] = 0;
 						http_response_code(200);
