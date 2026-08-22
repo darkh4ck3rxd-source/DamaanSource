@@ -90,9 +90,30 @@ if ($qr === '') {
         $qr = $legacyDir . rawurlencode((string)$legacyRow['filename']);
     }
 }
-$title = $method === 'usdt' ? 'USDT Deposit' : 'Wake UP-APP UPI Deposit';
+$title = $method === 'usdt' ? 'USDT Deposit' : 'Expert UPI-QR Deposit';
 $unit = $method === 'usdt' ? 'USDT' : 'INR';
 $maximum = $method === 'usdt' ? 1000000 : 50000;
+$paymentOrderId = '';
+if ($user && $method === 'upi') {
+    $candidateOrderId = trim((string)($_GET['order_id'] ?? ''));
+    if (preg_match('/^[0-9]{18,24}$/', $candidateOrderId)) {
+        $paymentOrderId = $candidateOrderId;
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $paymentOrderId = date('YmdHis') . random_int(100000, 999999);
+    }
+}
+$upiIntentUrl = '';
+if ($method === 'upi' && $account !== '' && $paymentOrderId !== '') {
+    $intentAmount = number_format($amount, 2, '.', '');
+    $intentOrder = rawurlencode($paymentOrderId);
+    $upiIntentUrl = 'upi://pay?pa=' . rawurlencode($account)
+        . '&am=' . rawurlencode($intentAmount)
+        . '&cu=INR&tn=' . $intentOrder
+        . '&notes=' . $intentOrder
+        . '&transactionDescription=' . $intentOrder
+        . '&tid=' . $intentOrder
+        . '&tr=' . $intentOrder;
+}
 
 // A signed timer cookie prevents refresh/tampering from extending the five-minute window.
 $timerCookieName = 'jalwa_qr_timer_' . substr(hash('sha256', $uid . '|' . $method . '|' . number_format($amount, 2, '.', '')), 0, 20);
@@ -134,8 +155,12 @@ if ($user && time() >= $expiresAt) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     // Amount is intentionally taken from the signed page URL, not from the editable request body.
     $amount = (float)($_GET['amount'] ?? $amount);
+    $orderId = trim((string)($_POST['order_id'] ?? $paymentOrderId));
     $utr = trim((string)($_POST['utr'] ?? ''));
-    if (!$timerValid || time() >= $expiresAt) {
+    if ($method !== 'upi' || !preg_match('/^[0-9]{18,24}$/', $orderId)) {
+        $statusMessage = 'The payment order is invalid. Please start a new deposit.';
+        $statusClass = 'error';
+    } elseif (!$timerValid || time() >= $expiresAt) {
         $pageExpired = true;
         $statusMessage = 'This payment page expired after 5 minutes. Please return to Deposit and start again.';
         $statusClass = 'error';
@@ -161,8 +186,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
             $statusMessage = 'This payment reference has already been submitted.';
             $statusClass = 'error';
         } else {
-            $serial = date('YmdHis') . random_int(100000, 999999);
-            $payName = $method === 'usdt' ? 'USDT QR' : 'Wake UPI QR';
+            $serial = $orderId !== '' ? $orderId : (date('YmdHis') . random_int(100000, 999999));
+            $payName = $method === 'usdt' ? 'USDT QR' : 'Expert UPI-QR';
             $createdAt = date('Y-m-d H:i:s');
             $insert = $conn->prepare("INSERT INTO thevani (payid, balakedara, motta, dharavahi, mula, ullekha, duravani, ekikrtapavati, dinankavannuracisi, madari, pavatiaidi, sthiti) VALUES ('1', ?, ?, ?, ?, ?, ?, ?, ?, '1005', '2', '0')");
             if ($insert) {
@@ -214,6 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     .timer.expired strong { color:#ffd8df; }
     .back { color:#6ff5df; text-decoration:none; font-size:15px; }
     .locked-note { color:#9fa9d0; font-size:12px; margin-top:6px; }
+    .upi-pay { display:flex; align-items:center; justify-content:center; gap:12px; background:#19d9c1; color:#03113c; text-decoration:none; border-radius:12px; padding:13px 15px; margin-top:16px; font-size:17px; font-weight:700; }
+    .upi-pay img { width:34px; height:34px; object-fit:contain; border-radius:7px; background:#fff; }
   </style>
 </head>
 <body>
@@ -226,11 +253,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
       <?php if ($timerValid && $user): ?><div id="expiryTimer" class="timer" data-expires="<?= (int)$expiresAt ?>"><span>Payment page expires in</span><strong>05:00</strong></div><?php endif; ?>
       <?php if ($qr !== ''): ?><img class="qr" src="<?= qr_page_escape($qr) ?>" alt="<?= qr_page_escape($title) ?> QR code"><?php else: ?><div class="empty">Admin has not configured this QR yet. Please contact support.</div><?php endif; ?>
       <?php if ($account !== ''): ?><div class="label"><?= $method === 'usdt' ? 'Wallet address (' . qr_page_escape($network) . ')' : 'UPI ID' ?></div><div class="value"><?= qr_page_escape($account) ?></div><?php endif; ?>
+      <?php if ($method === 'upi' && $upiIntentUrl !== '' && !$pageExpired): ?>
+        <a class="upi-pay" href="<?= qr_page_escape($upiIntentUrl) ?>"><img src="/assets/png/expert-upi-qr.png" alt="UPI"><span>Pay Via UPI</span></a>
+        <div class="locked-note">Your UPI app will open with the amount and order ID already filled.</div>
+      <?php endif; ?>
     </div>
     <?php if ($user): ?><div class="card">
       <h2>Submit payment reference</h2>
       <div class="label">Amount (locked, minimum <?= qr_page_escape(number_format($minimum, 2)) ?> <?= qr_page_escape($unit) ?>)</div>
       <form id="depositForm" method="post">
+        <?php if ($method === 'upi' && $paymentOrderId !== ''): ?><input type="hidden" name="order_id" value="<?= qr_page_escape($paymentOrderId) ?>"><?php endif; ?>
         <input class="amount-locked" type="number" name="amount" min="<?= qr_page_escape((string)$minimum) ?>" max="<?= qr_page_escape((string)$maximum) ?>" step="0.01" value="<?= qr_page_escape(number_format($amount, 2, '.', '')) ?>" readonly aria-readonly="true" tabindex="-1" required>
         <div class="locked-note">This amount is fixed by the deposit request and cannot be edited.</div>
         <div class="label">UTR / transaction hash</div>
