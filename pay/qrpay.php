@@ -31,6 +31,10 @@ $clientSign = strtoupper(trim((string)($_GET['sign'] ?? '')));
 $amount = (float)($_GET['amount'] ?? 0);
 $statusMessage = '';
 $statusClass = 'info';
+$pageExpired = false;
+$timerStart = 0;
+$timerValid = false;
+$timerDuration = 5 * 60;
 
 $user = null;
 if ($uid > 0) {
@@ -90,10 +94,52 @@ $title = $method === 'usdt' ? 'USDT Deposit' : 'Wake UP-APP UPI Deposit';
 $unit = $method === 'usdt' ? 'USDT' : 'INR';
 $maximum = $method === 'usdt' ? 1000000 : 50000;
 
+// A signed timer cookie prevents refresh/tampering from extending the five-minute window.
+$timerCookieName = 'jalwa_qr_timer_' . substr(hash('sha256', $uid . '|' . $method . '|' . number_format($amount, 2, '.', '')), 0, 20);
+$timerSecret = getenv('JWT_SECRET') ?: 'bdgshonuuncensored';
+$timerCookie = (string)($_COOKIE[$timerCookieName] ?? '');
+$timerParts = explode('|', $timerCookie);
+if (count($timerParts) === 3 && ctype_digit($timerParts[0]) && preg_match('/^[a-f0-9]{32}$/', $timerParts[1])) {
+    $candidateStart = (int)$timerParts[0];
+    $candidateNonce = $timerParts[1];
+    $candidateSig = $timerParts[2];
+    $candidateData = $uid . '|' . $method . '|' . number_format($amount, 2, '.', '') . '|' . $candidateStart . '|' . $candidateNonce;
+    $expectedTimerSig = hash_hmac('sha256', $candidateData, $timerSecret);
+    if (hash_equals($expectedTimerSig, $candidateSig) && $candidateStart <= time() && time() - $candidateStart < $timerDuration) {
+        $timerStart = $candidateStart;
+        $timerValid = true;
+    }
+}
+if ($user && $_SERVER['REQUEST_METHOD'] === 'GET' && !$timerValid) {
+    $timerStart = time();
+    $timerNonce = bin2hex(random_bytes(16));
+    $timerData = $uid . '|' . $method . '|' . number_format($amount, 2, '.', '') . '|' . $timerStart . '|' . $timerNonce;
+    $timerSignature = hash_hmac('sha256', $timerData, $timerSecret);
+    setcookie($timerCookieName, $timerStart . '|' . $timerNonce . '|' . $timerSignature, [
+        'expires' => $timerStart + $timerDuration,
+        'path' => '/pay/',
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+    $timerValid = true;
+}
+$expiresAt = $timerStart + $timerDuration;
+if ($user && time() >= $expiresAt) {
+    $pageExpired = true;
+    $statusMessage = 'This payment page expired after 5 minutes. Please return to Deposit and start again.';
+    $statusClass = 'error';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
-    $amount = (float)($_POST['amount'] ?? $amount);
+    // Amount is intentionally taken from the signed page URL, not from the editable request body.
+    $amount = (float)($_GET['amount'] ?? $amount);
     $utr = trim((string)($_POST['utr'] ?? ''));
-    if ($amount < $minimum) {
+    if (!$timerValid || time() >= $expiresAt) {
+        $pageExpired = true;
+        $statusMessage = 'This payment page expired after 5 minutes. Please return to Deposit and start again.';
+        $statusClass = 'error';
+    } elseif ($amount < $minimum) {
         $statusMessage = 'Minimum deposit is ' . number_format($minimum, 2) . ' ' . $unit . '.';
         $statusClass = 'error';
     } elseif ($amount > $maximum) {
@@ -157,10 +203,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
     .value { display:flex; justify-content:space-between; gap:12px; align-items:center; background:#04032a; border-radius:10px; padding:13px; word-break:break-all; }
     .label { color:#9fa9d0; font-size:13px; margin:14px 0 6px; }
     input { width:100%; border:0; border-radius:10px; padding:14px; font-size:17px; background:#04032a; color:#fff; outline:0; }
+    input.amount-locked { color:#c7d2fe; border:1px solid #314275; cursor:not-allowed; opacity:.9; }
     button { width:100%; margin-top:18px; border:0; border-radius:12px; padding:15px; font-size:17px; font-weight:700; background:#19d9c1; color:#03113c; }
+    button:disabled { background:#68739a; color:#d7dcf0; cursor:not-allowed; }
     .notice { border-radius:10px; padding:13px; line-height:1.4; margin-bottom:16px; }
     .notice.info { background:#173267; color:#dbe6ff; } .notice.error { background:#632b3e; color:#ffd8df; } .notice.success { background:#155a4d; color:#d6fff3; }
+    .timer { display:flex; justify-content:space-between; align-items:center; gap:12px; background:#321f53; border:1px solid #8d62c5; color:#f4eaff; border-radius:10px; padding:13px 15px; font-weight:700; margin:14px 0; }
+    .timer strong { color:#7fffea; font-size:20px; letter-spacing:1px; }
+    .timer.expired { background:#632b3e; border-color:#b65b71; color:#ffd8df; }
+    .timer.expired strong { color:#ffd8df; }
     .back { color:#6ff5df; text-decoration:none; font-size:15px; }
+    .locked-note { color:#9fa9d0; font-size:12px; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -170,19 +223,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user && $uid > 0) {
       <h1><?= qr_page_escape($title) ?></h1>
       <p class="muted">Scan the QR, complete the payment, then submit the payment reference below. Your wallet will be updated after verification.</p>
       <?php if ($statusMessage !== ''): ?><div class="notice <?= qr_page_escape($statusClass) ?>"><?= qr_page_escape($statusMessage) ?></div><?php endif; ?>
+      <?php if ($timerValid && $user): ?><div id="expiryTimer" class="timer" data-expires="<?= (int)$expiresAt ?>"><span>Payment page expires in</span><strong>05:00</strong></div><?php endif; ?>
       <?php if ($qr !== ''): ?><img class="qr" src="<?= qr_page_escape($qr) ?>" alt="<?= qr_page_escape($title) ?> QR code"><?php else: ?><div class="empty">Admin has not configured this QR yet. Please contact support.</div><?php endif; ?>
       <?php if ($account !== ''): ?><div class="label"><?= $method === 'usdt' ? 'Wallet address (' . qr_page_escape($network) . ')' : 'UPI ID' ?></div><div class="value"><?= qr_page_escape($account) ?></div><?php endif; ?>
     </div>
-    <div class="card">
+    <?php if ($user): ?><div class="card">
       <h2>Submit payment reference</h2>
-      <div class="label">Amount (minimum <?= qr_page_escape(number_format($minimum, 2)) ?> <?= qr_page_escape($unit) ?>)</div>
-      <form method="post">
-        <input type="number" name="amount" min="<?= qr_page_escape((string)$minimum) ?>" max="<?= qr_page_escape((string)$maximum) ?>" step="0.01" value="<?= qr_page_escape(number_format($amount, 2, '.', '')) ?>" required>
+      <div class="label">Amount (locked, minimum <?= qr_page_escape(number_format($minimum, 2)) ?> <?= qr_page_escape($unit) ?>)</div>
+      <form id="depositForm" method="post">
+        <input class="amount-locked" type="number" name="amount" min="<?= qr_page_escape((string)$minimum) ?>" max="<?= qr_page_escape((string)$maximum) ?>" step="0.01" value="<?= qr_page_escape(number_format($amount, 2, '.', '')) ?>" readonly aria-readonly="true" tabindex="-1" required>
+        <div class="locked-note">This amount is fixed by the deposit request and cannot be edited.</div>
         <div class="label">UTR / transaction hash</div>
         <input type="text" name="utr" minlength="6" maxlength="80" placeholder="Enter payment reference" required>
-        <button type="submit">Submit Deposit Request</button>
+        <button id="submitDeposit" type="submit" <?= $pageExpired ? 'disabled' : '' ?>>Submit Deposit Request</button>
       </form>
-    </div>
+    </div><?php endif; ?>
   </main>
+  <?php if ($timerValid && $user): ?><script>
+    (function () {
+      const timer = document.getElementById('expiryTimer');
+      const form = document.getElementById('depositForm');
+      const button = document.getElementById('submitDeposit');
+      const counter = timer ? timer.querySelector('strong') : null;
+      const expiresAt = Number(timer && timer.dataset.expires);
+      let expired = false;
+      function updateTimer() {
+        const seconds = expiresAt - Math.floor(Date.now() / 1000);
+        if (seconds <= 0) {
+          expired = true;
+          timer.classList.add('expired');
+          timer.querySelector('span').textContent = 'Payment page expired';
+          counter.textContent = '00:00';
+          button.disabled = true;
+          return;
+        }
+        const minutes = String(Math.floor(seconds / 60)).padStart(2, '0');
+        const remainder = String(seconds % 60).padStart(2, '0');
+        counter.textContent = minutes + ':' + remainder;
+      }
+      updateTimer();
+      const interval = setInterval(function () {
+        updateTimer();
+        if (expired) clearInterval(interval);
+      }, 1000);
+      form.addEventListener('submit', function (event) {
+        if (expired) {
+          event.preventDefault();
+          window.alert('This payment page has expired. Please start a new deposit.');
+        }
+      });
+    }());
+  </script><?php endif; ?>
 </body>
 </html>
