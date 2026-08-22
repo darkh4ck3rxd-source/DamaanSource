@@ -100,6 +100,8 @@ $data['typelist'][4]['minPrice'] = 10;
 
                         
 						
+						// Keep typelist JSON as a sequential array after channel removal.
+						$data['typelist'] = array_values($data['typelist']);
 						$res['data'] = $data;
 						$res['code'] = 0;
 						$res['msg'] = 'Succeed';
