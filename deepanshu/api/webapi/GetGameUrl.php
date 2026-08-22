@@ -23,15 +23,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $body = json_decode(file_get_contents('php://input'), true) ?: [];
 $gameCode = trim((string)($body['gameCode'] ?? ''));
 $vendorCode = trim((string)($body['vendorCode'] ?? ''));
-$language = (string)($body['language'] ?? '');
-$phonetype = (string)($body['phonetype'] ?? '');
-$random = (string)($body['random'] ?? '');
+$random = trim((string)($body['random'] ?? ''));
 $signature = strtoupper(trim((string)($body['signature'] ?? '')));
-if ($gameCode === '' || $vendorCode === '' || $language === '' || $phonetype === '' || $random === '' || $signature === '' || !isset($body['timestamp'])) {
+$hasDeviceType = array_key_exists('deviceType', $body);
+$hasPhoneType = array_key_exists('phonetype', $body);
+$requiredFieldsPresent = $gameCode !== ''
+    && $vendorCode !== ''
+    && $random !== ''
+    && $signature !== ''
+    && array_key_exists('language', $body)
+    && array_key_exists('timestamp', $body)
+    && ($hasDeviceType || $hasPhoneType);
+if (!$requiredFieldsPresent) {
     game_response(['code' => 7, 'msg' => 'Param is Invalid', 'msgCode' => 6], 200);
 }
-$signatureString = '{"gameCode":"' . $gameCode . '","language":' . $language . ',"phonetype":' . $phonetype . ',"random":"' . $random . '","vendorCode":' . $vendorCode . '}';
-$expectedSignature = strtoupper(md5($signatureString));
+
+// The web client signs the complete request data after sorting keys and
+// excluding only signature/track/xosoBettingData. Keep numeric zero values.
+$signedPayload = $body;
+foreach (['signature', 'track', 'xosoBettingData'] as $excludedKey) {
+    unset($signedPayload[$excludedKey]);
+}
+foreach ($signedPayload as $key => $value) {
+    if ($value === null || $value === '') {
+        unset($signedPayload[$key]);
+    }
+}
+ksort($signedPayload, SORT_STRING);
+$signatureString = json_encode($signedPayload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+$expectedSignature = strtoupper(md5($signatureString === false ? '' : $signatureString));
 if (!hash_equals($expectedSignature, $signature)) {
     game_response(['code' => 5, 'msg' => 'Wrong signature', 'msgCode' => 3], 200);
 }
