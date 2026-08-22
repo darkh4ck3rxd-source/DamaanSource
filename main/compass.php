@@ -231,6 +231,7 @@
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="wager_management.php">Wager Management</a></li>
                 <li class="nav-item"> <a class="nav-link" href="agency_metrics.php">Agency Data Editor</a></li>
+                <li class="nav-item"> <a class="nav-link" href="promotion_metrics.php">Promotion Data Editor</a></li>
               </ul>
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="manage_salary.php">Daily Salary</a></li>
