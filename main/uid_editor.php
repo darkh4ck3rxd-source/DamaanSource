@@ -4,6 +4,7 @@ if (empty($_SESSION['unohs'])) {
     header('Location: index.php?msg=unauthorized');
     exit;
 }
+require_once __DIR__ . '/conn.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
