@@ -253,7 +253,7 @@ if ($error === '' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
         };
         updateTimer();
         const timerInterval = setInterval(updateTimer, 1000);
-        setTimeout(function () { window.location.href = <?= json_encode($phonepeUrl, JSON_UNESCAPED_SLASHES) ?>; }, 350);
+        // Keep external-app navigation behind the user’s direct tap on the Open PhonePe button. This prevents browsers from returning to Deposit or opening an empty tab when the app chooser/security check cancels the launch.
       }());
     </script><?php endif; ?>
   </main>
