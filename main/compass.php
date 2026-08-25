@@ -197,7 +197,7 @@
               
               <div class="collapse" id="ui-basic-4">
                 <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="autobanuser.php">Check Same IP</a></li>
+                <li class="nav-item"> <a class="nav-link" href="autobanuser.php">Duplicate IP Security</a></li>
                   </ul>
                 
                 

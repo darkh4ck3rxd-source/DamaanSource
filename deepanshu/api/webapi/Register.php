@@ -10,8 +10,20 @@
 	header('Access-Control-Allow-Origin: ' . $origin);
 	header('vary: Origin');
 	
-	date_default_timezone_set("Asia/Kolkata");
-	$shnunc = date("Y-m-d H:i:s");
+		date_default_timezone_set("Asia/Kolkata");
+		$shnunc = date("Y-m-d H:i:s");
+
+		// The duplicate-IP checker defaults to ON until an admin explicitly turns it OFF.
+		$conn->query("CREATE TABLE IF NOT EXISTS jalwa_security_settings (
+			setting_key VARCHAR(64) NOT NULL PRIMARY KEY,
+			setting_value VARCHAR(32) NOT NULL,
+			updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+		$duplicateIpCheckerEnabled = true;
+		$securitySetting = $conn->query("SELECT setting_value FROM jalwa_security_settings WHERE setting_key = 'duplicate_ip_checker' LIMIT 1");
+		if ($securitySetting && ($securityRow = $securitySetting->fetch_assoc())) {
+			$duplicateIpCheckerEnabled = ((string)$securityRow['setting_value'] === '1');
+		}
 	$res = [
 		'code' => 11,
 		'msg' => 'Method not allowed',
@@ -148,9 +160,51 @@
 							$ipaddress = $_SERVER['REMOTE_ADDR'];
 						else
 							$ipaddress = 'UNKNOWN';	
-						$user_agent = $_SERVER['HTTP_USER_AGENT'];
-						
-						function generateUniqueString($length = 8) {
+							$user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+							// Use only a validated single IP for the automatic duplicate check.
+							$duplicateCheckIp = '';
+							$ipHeaders = ['HTTP_CF_CONNECTING_IP', 'HTTP_X_REAL_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
+							foreach ($ipHeaders as $ipHeader) {
+								if (empty($_SERVER[$ipHeader])) {
+									continue;
+								}
+								foreach (explode(',', (string)$_SERVER[$ipHeader]) as $ipCandidate) {
+									$ipCandidate = trim($ipCandidate);
+									if (filter_var($ipCandidate, FILTER_VALIDATE_IP)) {
+										$duplicateCheckIp = $ipCandidate;
+										break 2;
+									}
+								}
+							}
+
+							if ($duplicateIpCheckerEnabled && $duplicateCheckIp !== '') {
+								$duplicateStmt = $conn->prepare('SELECT id FROM shonu_subjects WHERE (ip = ? OR ishonup = ?) LIMIT 1');
+								if ($duplicateStmt) {
+									$duplicateStmt->bind_param('ss', $duplicateCheckIp, $duplicateCheckIp);
+									$duplicateStmt->execute();
+									$duplicateResult = $duplicateStmt->get_result();
+									$hasDuplicateIp = $duplicateResult && $duplicateResult->num_rows > 0;
+									$duplicateStmt->close();
+									if ($hasDuplicateIp) {
+										$suspendStmt = $conn->prepare('UPDATE shonu_subjects SET status = 0 WHERE ip = ? OR ishonup = ?');
+										if ($suspendStmt) {
+											$suspendStmt->bind_param('ss', $duplicateCheckIp, $duplicateCheckIp);
+											$suspendStmt->execute();
+											$suspendStmt->close();
+										}
+										$res['code'] = 1;
+										$res['msg'] = 'Registration blocked: duplicate IP detected';
+										$res['msgCode'] = 118;
+										$res['data'] = null;
+										http_response_code(200);
+										echo json_encode($res);
+									exit;
+								}
+								}
+							}
+
+							function generateUniqueString($length = 8) {
 							$letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 							$digits = '0123456789';
 							$minDigits = 2;
