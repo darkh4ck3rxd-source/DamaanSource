@@ -83,7 +83,7 @@ if ($isDemo) {
         WHERE `balakedara` = '$uid'
     ";
     $conn->query($updateQuery);
-    header('Location: https://damaansource-production.up.railway.app/#/main');
+    header('Location: https://www.jalwagames.site/#/main');
     exit;
 }
 
@@ -96,8 +96,8 @@ $res = [
 if (isset($_GET['tyid'], $_GET['amount'], $_GET['uid'], $_GET['sign'], $_GET['urlInfo'])) {
     $orderid = $serial;
     $amount = $ramt;
-    $notify_url = "https://damaansource-production.up.railway.app/pay/rswebhook.php";
-    $redirect_url = "https://damaansource-production.up.railway.app/#/main";
+    $notify_url = "https://www.jalwagames.site/pay/rswebhook.php";
+    $redirect_url = "https://www.jalwagames.site/#/main";
     $merchantId = "INR222570";
     $key = "rspay_token_1747393410286";
 

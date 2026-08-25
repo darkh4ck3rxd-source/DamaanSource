@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/svg+xml" href="https://damaansource-production.up.railway.app/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="https://www.jalwagames.site/favicon.png">
     <title>Admin Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -185,7 +185,7 @@
 <body>
     <div class="login-container">
         <div class="brand-wrapper">
-            <img src="https://damaansource-production.up.railway.app/logo.png" alt="Logo">
+            <img src="https://www.jalwagames.site/logo.png" alt="Logo">
             <h2>Admin Login</h2>
         </div>
         

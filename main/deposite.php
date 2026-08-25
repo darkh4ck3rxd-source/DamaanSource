@@ -152,8 +152,8 @@ include("conn.php");
                             echo "<td>" . $row["deposit_order_no"] . "</td>";
                             echo "<td>" . $row["order_amount"] . "</td>";
                             echo "<td>" . $row["utr"] . "</td>";
-                            echo "<td><a href='https://damaansource-production.up.railway.app/uploads/" . $row["file_upload"] . "'>" . $row["file_upload"] . "</a></td>";
-                            echo "<td><a href='https://damaansource-production.up.railway.app/uploads/" . $row["image_upload"] . "'>" . $row["image_upload"] . "</a></td>";
+                            echo "<td><a href='https://www.jalwagames.site/uploads/" . $row["file_upload"] . "'>" . $row["file_upload"] . "</a></td>";
+                            echo "<td><a href='https://www.jalwagames.site/uploads/" . $row["image_upload"] . "'>" . $row["image_upload"] . "</a></td>";
                             echo "<td><button class='btn btn-primary edit-btn' data-id='" . $row["id"] . "' data-remarks='" . $row["remarks"] . "'>Do Responce</button></td>";
                             echo "</tr>";
                         }

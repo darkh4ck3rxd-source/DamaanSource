@@ -258,7 +258,7 @@
 			}
 		  ?>
 		 <li class="nav-item">
-                    <a href="https://jalwa9.xyz" class="nav-link">
+                    <a href="https://www.jalwagames.site" class="nav-link">
                         <i class="nav-icon fa fa-sign-out" aria-hidden="true"></i>
                         <p>Go To Website</p>
                     </a>

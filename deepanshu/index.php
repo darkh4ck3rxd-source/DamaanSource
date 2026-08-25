@@ -1,7 +1,7 @@
 <?php 
 	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
 	header('Access-Control-Allow-Credentials: true');
-	header('Access-Control-Allow-Origin: https://jalwa9.xyz');
+	header('Access-Control-Allow-Origin: https://www.jalwagames.site');
 	header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
 	header('vary: Origin');
