@@ -79,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
                             $condition = "AND madari = 1";
                         } elseif ($withdrawid == -1) {
                             $condition = "";
+                        } elseif ($withdrawid == 2) {
+                            $condition = "AND madari = 2";
                         } elseif ($withdrawid == 3) {
                             $condition = "AND madari = 3";
                         }
@@ -99,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
                                   WHERE balakedara = $userId $condition $dateCondition 
                                   ORDER BY shonu DESC LIMIT $offset, $pageSize";
                         $result = $conn->query($query);
-                        $type = (int)$withdrawRow['madari']; $withdrawalslist[$i]['withdrawName'] = ($type === 1) ? 'BANK CARD' : (($type === 3) ? 'USDT' : 'OTHER');
 
                         if ($result) {
                             $withdrawalslist = [];
@@ -108,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
                                 $withdrawalslist[$i]['withdrawID'] = $withdrawRow['shonu'];
                                 $withdrawalslist[$i]['type'] = (int)$withdrawRow['madari'];
                                 $withdrawalslist[$i]['withdrawNumber'] = $withdrawRow['dharavahi'];
-                                $withdrawalslist[$i]['withdrawName'] = ($withdrawRow['madari'] == 1) ? 'BANK CARD' : (($withdrawRow['madari'] == 3) ? 'USDT' : 'KIDS_OP');
+                                $withdrawalslist[$i]['withdrawName'] = ($withdrawRow['madari'] == 2) ? 'UPI' : (($withdrawRow['madari'] == 1) ? 'BANK CARD' : (($withdrawRow['madari'] == 3) ? 'USDT' : 'OTHER'));
                                 $withdrawalslist[$i]['price'] = (int)$withdrawRow['motta'];
                                 $withdrawalslist[$i]['addTime'] = $withdrawRow['dinankavannuracisi'];
                                 $withdrawalslist[$i]['realityAmount'] = (int)$withdrawRow['motta'];
@@ -120,6 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
                             $response = [
                                 "data" => [
+                                    "withdrawlist" => $withdrawalslist,
                                     "list" => $withdrawalslist,
                                     "pageNo" => (int)$pageNo,
                                     "totalPage" => (int)$totalPage,
