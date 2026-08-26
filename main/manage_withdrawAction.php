@@ -1,14 +1,23 @@
-<?php 
-	include('conn.php');
-	
-	if(isset($_POST['type'])){
-		$id=$_POST['id'];
-        $remark=$_POST['remark'];
+<?php
+		session_start();
+		if (empty($_SESSION['unohs'])) {
+			http_response_code(401);
+			exit('Unauthorized');
+		}
+		include('conn.php');
+
+		if(isset($_POST['type'])){
+			$id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+			if (!$id) { http_response_code(422); exit('Invalid withdrawal ID'); }
+	        $remark = trim(substr((string)($_POST['remark'] ?? ''), 0, 255));
+			$remarkEsc = mysqli_real_escape_string($conn, $remark);
 		$today=date( 'Y-m-d H:i:s' );
 		
-		$finduid=mysqli_query($conn,"select * from `hintegedukolli` where `shonu`='".$id."'");
-		$finduidArray = mysqli_fetch_array($finduid);
-		$userid = $finduidArray['balakedara'];
+			$finduid=mysqli_query($conn,"select * from `hintegedukolli` where `shonu`='".$id."' LIMIT 1");
+			$finduidArray = $finduid ? mysqli_fetch_array($finduid) : null;
+			if (!$finduidArray) { http_response_code(404); exit('Withdrawal not found'); }
+			if ((int)($finduidArray['sthiti'] ?? 0) !== 0) { http_response_code(409); exit('Withdrawal already processed'); }
+			$userid = $finduidArray['balakedara'];
 		$serial = $finduidArray['dharavahi'];
 		$amount = $finduidArray['motta'];
 		$bid = $finduidArray['khateshonu'];
@@ -102,22 +111,22 @@
 				$un = json_decode($response, true);
 				
 				if($un['status'] == 200){
-					$sqlA = mysqli_query($conn,"Update `hintegedukolli` set sthiti = '1',tike = 'Completed',dinankavannuracisi = '".$today."' where `shonu`='".$id."' ");
+					$sqlA = mysqli_query($conn,"UPDATE `hintegedukolli` SET sthiti = '1', tike = 'Completed', remarks = '".$remarkEsc."', dinankavannuracisi = '".$today."' WHERE `shonu`='".$id."'");
 				}
 			}			
 			else if($gateway == 'manual'){
-				$sqlA = mysqli_query($conn,"Update `hintegedukolli` set sthiti = '1',tike = 'Completed',remarks = '".$remark."',dinankavannuracisi = '".$today."' where `shonu`='".$id."' ");
+				$sqlA = mysqli_query($conn,"Update `hintegedukolli` set sthiti = '1',tike = 'Completed',	                                 remarks = '".$remarkEsc."' ,dinankavannuracisi = '".$today."' where `shonu`='".$id."' ");
 			}
 			//$sqlA = mysqli_query($conn,"Update `hintegedukolli` set sthiti = '1',remarks = 'Completed',tike = 'Completed',dinankavannuracisi = '".$today."' where `shonu`='".$id."' ");
 			echo 1;
 		}
 		else if($_POST['type']=='reject'){
-			$sqlA = mysqli_query($conn, "UPDATE `hintegedukolli` 
-                             SET sthiti = '2', 
-                                 tike = 'Rejected', 
-                                 dinankavannuracisi = '".$today."', 
-                                 remarks = '".$remark."' 
-                             WHERE `shonu`='".$id."'");
+			$sqlA = mysqli_query($conn, "UPDATE `hintegedukolli`
+				SET sthiti = '2',
+				    tike = 'Rejected',
+				    dinankavannuracisi = '".$today."',
+				    remarks = '".$remarkEsc."'
+				WHERE `shonu`='".$id."'");
 
 $sqlwallet = mysqli_query($conn, "UPDATE `shonu_kaichila` 
                                   SET `motta` = ROUND((motta + '$amount'), 2) 

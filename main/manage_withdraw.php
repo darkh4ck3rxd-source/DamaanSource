@@ -1,8 +1,9 @@
 <?php
 	session_start();
-	if($_SESSION['unohs'] == null){
-		header("location:index.php?msg=unauthorized");
-	}
+if (empty($_SESSION['unohs'])) {
+			header("location:index.php?msg=unauthorized");
+			exit;
+		}
 ?>
 <?php
 	include ("conn.php");
@@ -56,6 +57,7 @@
         background-color: #343a40;
         color: #fff;
     }
+    .withdraw-action { display:inline-block; margin:2px; }
 	#copied{
 		visibility: hidden;
 		z-index: 1;
@@ -138,7 +140,7 @@
 								<th>Payout Type</th>
                               	<th>Order ID</th>
 								<th>Req. Date</th>
-								<th>Action</th>
+									<th>Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -155,10 +157,14 @@
 									<td><?php echo $i; ?></td>
 									<td><?php echo $row["user"]; ?></td>
 									<td><?php echo number_format($row['motta'],2);?></td>
-									<td><?php echo 'bank'; ?></td>
-                                  	<td><?php echo $row["dharavahi"]; ?></td>
+								<td><?php echo ((int)$row['madari'] === 2) ? 'UPI' : (((int)$row['madari'] === 3) ? 'USDT' : 'BANK CARD'); ?></td>
+                                    <td><?php echo htmlspecialchars($row["dharavahi"] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
 									<td><?php echo date('d-m-Y', strtotime($row['dinankavannuracisi']));?></td>
-									<td><a href="withdrawal-accept-reject.php?id=<?php echo encryptor('encrypt', $row['shonu']); ?>" data-toggle="tooltip" title="Accept/Reject"><i class="fa fa-eye" style="font-size:20px;"></i></a></td>
+									<td>
+										<a class="btn btn-sm btn-primary withdraw-action" href="withdrawal-accept-reject.php?id=<?php echo encryptor('encrypt', $row['shonu']); ?>" title="Open full update"><i class="fa fa-eye"></i> Update</a>
+										<button type="button" class="btn btn-sm btn-success withdraw-action" onclick="withdrawDecision(<?php echo (int)$row['shonu']; ?>, 'accept')"><i class="fa fa-check"></i> Approve</button>
+										<button type="button" class="btn btn-sm btn-danger withdraw-action" onclick="withdrawDecision(<?php echo (int)$row['shonu']; ?>, 'reject')"><i class="fa fa-times"></i> Reject</button>
+									</td>
 								</tr>
 						<?php 
 							}
@@ -186,8 +192,26 @@
   <script src="vendors/jquery-bar-rating/jquery.barrating.min.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-  <script>
-	$(function () {
+	  <script>
+		function withdrawDecision(id, type) {
+			var actionLabel = type === 'accept' ? 'approve' : 'reject';
+			if (!window.confirm('Are you sure you want to ' + actionLabel + ' this withdrawal?')) return;
+			var remark = window.prompt('Enter remark (optional):', '') || '';
+			fetch('manage_withdrawAction.php', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+				body: new URLSearchParams({id: String(id), type: type, remark: remark})
+			}).then(function (response) {
+				return response.text().then(function (text) { return {ok: response.ok, text: text.trim()}; });
+			}).then(function (result) {
+				if (result.ok && (result.text === '1' || result.text === '2')) {
+					window.location.reload();
+					return;
+				}
+				window.alert(result.text || 'Unable to update withdrawal');
+			}).catch(function () { window.alert('Unable to update withdrawal'); });
+		}
+		$(function () {
 		$('#example1').DataTable({
 		  "paging": true,
 		  "lengthChange": false,

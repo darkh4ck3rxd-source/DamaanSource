@@ -126,7 +126,7 @@
                 <li class="nav-item"> <a class="nav-link" href="deposit_update.php">Deposit Update</a></li>
               </ul>
 			  <ul class="nav flex-column sub-menu">
-                <li class="nav-item"> <a class="nav-link" href="manage_withdraw.php">Withdraw Apply</a></li>
+                <li class="nav-item"> <a class="nav-link" href="manage_withdraw.php">Withdraw Update</a></li>
               </ul>
 			  <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="withdraw_accept_list.php">Withdraw Sent</a></li>
