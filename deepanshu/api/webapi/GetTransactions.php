@@ -18,9 +18,11 @@ error_reporting(E_ALL);
 			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY (id),
 			KEY idx_balance_credit_user_created (userid, created_at)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+			$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN IF NOT EXISTS transaction_type INT NOT NULL DEFAULT 124 AFTER wager_amount");
+			$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN IF NOT EXISTS transaction_type_code VARCHAR(10) NOT NULL DEFAULT '8124' AFTER transaction_type");
 
-		header('Content-Type: application/json; charset=utf-8');
+			header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
 	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
 	header('Access-Control-Allow-Credentials: true');
@@ -156,7 +158,7 @@ error_reporting(E_ALL);
 										SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala
 									  FROM hodike_balakedara WHERE userkani = $shonuid
 									  UNION ALL
-									  SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala
+									  SELECT id as parichaya, amount as ketebida, CONCAT('balance_credit_', transaction_type) as phalaphala, note as sesabida, created_at as tiarikala
 									  FROM admin_balance_credits WHERE userid = $shonuid
 									  \x4f\x52\x44\x45\x52\x20\x42\x59\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\x20\x44\x45\x53\x43\x20\x4c\x49\x4d\x49\x54\x20$pageSize\x20\x4f\x46\x46\x53\x45\x54\x20$samatolana";
 								$samasyephalitansa = $conn->query($samasye);
@@ -251,9 +253,9 @@ error_reporting(E_ALL);
 								$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 							}
 							else if($type == 124){
-									$samasye = "SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasye = "SELECT id as parichaya, amount as ketebida, CONCAT('balance_credit_', transaction_type) as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = 124 ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
 									$samasyephalitansa = $conn->query($samasye);
-									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid";
+									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = 124";
 									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
 									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 								}
@@ -564,7 +566,7 @@ error_reporting(E_ALL);
 										SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala
 									  FROM hodike_balakedara WHERE userkani = $shonuid AND date(shonu) = date('".$date."')
 									  UNION ALL
-									  SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala
+									  SELECT id as parichaya, amount as ketebida, CONCAT('balance_credit_', transaction_type) as phalaphala, note as sesabida, created_at as tiarikala
 									  FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."')
 									  ORDER BY tiarikala DESC LIMIT $pageSize OFFSET $samatolana";
 								$samasyephalitansa = $conn->query($samasye);
@@ -659,9 +661,9 @@ error_reporting(E_ALL);
 								$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 							}
 							else if($type == 124){
-									$samasye = "SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."') ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasye = "SELECT id as parichaya, amount as ketebida, CONCAT('balance_credit_', transaction_type) as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = 124 AND date(created_at) = date('".$date."') ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
 									$samasyephalitansa = $conn->query($samasye);
-									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."')";
+									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = 124 AND date(created_at) = date('".$date."')";
 									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
 									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 								}
@@ -895,7 +897,23 @@ error_reporting(E_ALL);
 								$samasyephalitansa_ondu = $conn->query($samasye_ondu);
 								$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 							}
-						}						
+						}
+
+						// Admin balance credits can be assigned any visible transaction category.
+						// For a selected category, show matching admin credits through the same card formatter.
+						$selectedCreditType = (int)$type;
+						if ($selectedCreditType >= 0 && $selectedCreditType <= 124) {
+							$creditDateFilter = $date == '' ? '' : " AND date(created_at) = date('".$date."')";
+							$creditCountResult = $conn->query("SELECT COUNT(*) AS total FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = $selectedCreditType $creditDateFilter");
+							$creditCountRow = $creditCountResult ? $creditCountResult->fetch_assoc() : null;
+							$creditCount = (int)($creditCountRow['total'] ?? 0);
+							if ($creditCount > 0) {
+								$samasye = "SELECT id as parichaya, amount as ketebida, CONCAT('balance_credit_', transaction_type) as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid AND transaction_type = $selectedCreditType $creditDateFilter ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
+								$samasyephalitansa = $conn->query($samasye);
+								$samasyephalitansa_sankhye = $creditCount;
+								$type = 124;
+							}
+						}
 						
 						if($type == -1 || $type == 0 || $type == 1 || $type == 4 || $type == 119|| $type == 5 || $type == 2 || $type == 3 || $type == 14 || $type == 124 || $type == 9){
 							if ($samasyephalitansa->num_rows > 0) {
@@ -974,11 +992,13 @@ error_reporting(E_ALL);
 										$data['list'][$i]['remark'] = '';
 									}
 									else{
-																						if($row['phalaphala'] == 'balance_credit'){
-													$data['list'][$i]['amount'] = $row['ketebida'];
-													$data['list'][$i]['type'] = 124;
-													$data['list'][$i]['typeName'] = 'Balance Credit';
-													$data['list'][$i]['typeNameCode'] = '8124';
+																						if(strpos((string)$row['phalaphala'], 'balance_credit_') === 0){
+														$creditType = (int)substr((string)$row['phalaphala'], strlen('balance_credit_'));
+														if ($creditType < 0 || $creditType > 124) { $creditType = 124; }
+														$data['list'][$i]['amount'] = $row['ketebida'];
+														$data['list'][$i]['type'] = $creditType;
+														$data['list'][$i]['typeName'] = $creditType === 124 ? 'Balance Credit' : 'Admin credit';
+														$data['list'][$i]['typeNameCode'] = (string)(8000 + $creditType);
 													$data['list'][$i]['orderNum'] = $row['parichaya'];
 													$data['list'][$i]['addTime'] = $row['tiarikala'];
 													$data['list'][$i]['remark'] = $row['sesabida'];
