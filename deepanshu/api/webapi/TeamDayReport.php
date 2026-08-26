@@ -1783,29 +1783,47 @@
                                 }
 
                                 if (!empty($data['list'])) {
-                                    $rowStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_date IN (?, ?) AND metric_key IN (\'level\', \'deposit_amount\', \'commission\') ORDER BY metric_date ASC');
-                                    if ($rowStmt) {
-                                        foreach ($data['list'] as &$agencyRow) {
-                                            $rowUserId = (int)($agencyRow['userID'] ?? $agencyRow['userId'] ?? $agencyRow['id'] ?? 0);
-                                            if ($rowUserId < 1) {
-                                                continue;
-                                            }
-                                            $rowStmt->bind_param('iss', $rowUserId, $legacyMetricDate, $overrideDate);
-                                            $rowStmt->execute();
-                                            $rowResult = $rowStmt->get_result();
-                                            while ($rowOverride = $rowResult->fetch_assoc()) {
-                                                if ($rowOverride['metric_key'] === 'level') {
-                                                    $agencyRow['lv'] = (int)$rowOverride['metric_value'];
-                                                } elseif ($rowOverride['metric_key'] === 'deposit_amount') {
-                                                    $agencyRow['rechargeAmount'] = (float)$rowOverride['metric_value'];
-                                                } elseif ($rowOverride['metric_key'] === 'commission') {
-                                                    $agencyRow['rebateAmount'] = (float)$rowOverride['metric_value'];
-                                                }
+                                    $overrideValues = [];
+                                    $rowIds = [];
+                                    foreach ($data['list'] as $agencyRow) {
+                                        foreach (['userID', 'userId', 'id', 'uid'] as $idKey) {
+                                            $candidateId = (int)($agencyRow[$idKey] ?? 0);
+                                            if ($candidateId > 0) {
+                                                $rowIds[$candidateId] = $candidateId;
+                                                break;
                                             }
                                         }
-                                        unset($agencyRow);
-                                        $rowStmt->close();
                                     }
+                                    if ($rowIds) {
+                                        $idList = implode(',', array_map('intval', array_values($rowIds)));
+                                        $overrideResult = $conn->query("SELECT user_id, metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id IN ($idList) AND metric_date IN ('" . $legacyMetricDate . "', '" . $overrideDate . "') AND metric_key IN ('level', 'deposit_amount', 'commission') ORDER BY metric_date ASC, id ASC");
+                                        if ($overrideResult) {
+                                            while ($rowOverride = $overrideResult->fetch_assoc()) {
+                                                $overrideValues[(int)$rowOverride['user_id']][(string)$rowOverride['metric_key']] = (float)$rowOverride['metric_value'];
+                                            }
+                                        }
+                                    }
+                                    foreach ($data['list'] as &$agencyRow) {
+                                        $rowUserId = 0;
+                                        foreach (['userID', 'userId', 'id', 'uid'] as $idKey) {
+                                            $candidateId = (int)($agencyRow[$idKey] ?? 0);
+                                            if ($candidateId > 0) {
+                                                $rowUserId = $candidateId;
+                                                break;
+                                            }
+                                        }
+                                        $rowOverrides = $overrideValues[$rowUserId] ?? [];
+                                        if (array_key_exists('level', $rowOverrides)) {
+                                            $agencyRow['lv'] = (int)$rowOverrides['level'];
+                                        }
+                                        if (array_key_exists('deposit_amount', $rowOverrides)) {
+                                            $agencyRow['rechargeAmount'] = $rowOverrides['deposit_amount'];
+                                        }
+                                        if (array_key_exists('commission', $rowOverrides)) {
+                                            $agencyRow['rebateAmount'] = $rowOverrides['commission'];
+                                        }
+                                    }
+                                    unset($agencyRow);
                                 }
                             }
 
