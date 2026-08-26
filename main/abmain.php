@@ -20,9 +20,34 @@ if ($result && mysqli_num_rows($result) > 0) {
 
 // Handle form submission for USDT rate update
 if (isset($_POST['newupi'])) {
-    $newRate = mysqli_real_escape_string($conn, $_POST['newupi']);
-    $updateQuery = "UPDATE tbl_pg SET rate='" . $newRate . "' WHERE value = 'usdt'";
-    $updateResult = mysqli_query($conn, $updateQuery);
+    $newRate = trim((string)$_POST['newupi']);
+    $rateId = null;
+    $findRate = $conn->prepare("SELECT id FROM tbl_pg WHERE LOWER(value) = 'usdt' LIMIT 1");
+    if ($findRate) {
+        $findRate->execute();
+        $rateRow = $findRate->get_result()->fetch_assoc();
+        $rateId = $rateRow['id'] ?? null;
+        $findRate->close();
+    }
+    if ($rateId !== null) {
+        $update = $conn->prepare('UPDATE tbl_pg SET rate = ? WHERE id = ?');
+        if ($update) {
+            $update->bind_param('si', $newRate, $rateId);
+            $updateResult = $update->execute();
+            $update->close();
+        } else {
+            $updateResult = false;
+        }
+    } else {
+        $insert = $conn->prepare("INSERT INTO tbl_pg (value, rate, status) VALUES ('usdt', ?, '0')");
+        if ($insert) {
+            $insert->bind_param('s', $newRate);
+            $updateResult = $insert->execute();
+            $insert->close();
+        } else {
+            $updateResult = false;
+        }
+    }
 
     if ($updateResult) {
         echo '<script type="text/JavaScript"> alert("USDT rate updated"); </script>';

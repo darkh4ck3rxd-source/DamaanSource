@@ -8,7 +8,7 @@ if (empty($_SESSION['unohs'])) {
 require_once __DIR__ . '/conn.php';
 
 $currentRate = 0;
-$result = $conn->query("SELECT rate FROM tbl_pg WHERE value = 'usdt' LIMIT 1");
+$result = $conn->query("SELECT rate FROM tbl_pg WHERE LOWER(value) = 'usdt' LIMIT 1");
 if ($result && ($row = $result->fetch_assoc())) {
     $currentRate = $row['rate'];
 }
@@ -24,16 +24,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newupi'])) {
     if ($newRate === '' || !is_numeric($newRate) || (float)$newRate < 0) {
         $message = 'Please enter a valid USDT rate.';
         $messageType = 'danger';
-    } else {
-        $update = $conn->prepare("UPDATE tbl_pg SET rate = ? WHERE value = 'usdt'");
-        if ($update) {
-            $update->bind_param('s', $newRate);
-            $updated = $update->execute();
-            $update->close();
-        } else {
-            $updated = false;
-        }
-        if ($updated) {
+	    } else {
+	        $rateId = null;
+	        $findRate = $conn->prepare("SELECT id FROM tbl_pg WHERE LOWER(value) = 'usdt' LIMIT 1");
+	        if ($findRate) {
+	            $findRate->execute();
+	            $rateRow = $findRate->get_result()->fetch_assoc();
+	            $rateId = $rateRow['id'] ?? null;
+	            $findRate->close();
+	        }
+	        if ($rateId !== null) {
+	            $update = $conn->prepare('UPDATE tbl_pg SET rate = ? WHERE id = ?');
+	            if ($update) {
+	                $update->bind_param('si', $newRate, $rateId);
+	                $updated = $update->execute();
+	                $update->close();
+	            } else {
+	                $updated = false;
+	            }
+	        } else {
+	            $insert = $conn->prepare("INSERT INTO tbl_pg (value, rate, status) VALUES ('usdt', ?, '0')");
+	            if ($insert) {
+	                $insert->bind_param('s', $newRate);
+	                $updated = $insert->execute();
+	                $insert->close();
+	            } else {
+	                $updated = false;
+	            }
+	        }
+	        if ($updated) {
             header('Location: usdtkids.php?updated=1');
             exit;
         }
