@@ -1786,7 +1786,7 @@
                                     $rowStmt = $conn->prepare('SELECT metric_key, metric_value FROM subordinate_metric_overrides WHERE user_id = ? AND metric_date IN (?, ?) AND metric_key IN (\'level\', \'deposit_amount\', \'commission\') ORDER BY metric_date ASC');
                                     if ($rowStmt) {
                                         foreach ($data['list'] as &$agencyRow) {
-                                            $rowUserId = (int)($agencyRow['userID'] ?? 0);
+                                            $rowUserId = (int)($agencyRow['userID'] ?? $agencyRow['userId'] ?? $agencyRow['id'] ?? 0);
                                             if ($rowUserId < 1) {
                                                 continue;
                                             }
