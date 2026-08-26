@@ -24,8 +24,8 @@
 		
 		$sql_d = "SELECT * FROM tbl_pg WHERE status = '1'";		
 		$run_d = mysqli_query($conn, $sql_d);
-		$rund_f = mysqli_fetch_array($run_d);
-		$gateway = $rund_f['value'];
+			$rund_f = $run_d ? mysqli_fetch_array($run_d) : null;
+			$gateway = (string)($rund_f['value'] ?? 'manual');
 		
 		if($_POST['type']=='accept'){
 			if($gateway == 'indianpay'){

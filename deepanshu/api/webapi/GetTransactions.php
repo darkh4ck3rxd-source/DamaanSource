@@ -19,8 +19,14 @@ error_reporting(E_ALL);
 			PRIMARY KEY (id),
 			KEY idx_balance_credit_user_created (userid, created_at)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-			$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN IF NOT EXISTS transaction_type INT NOT NULL DEFAULT 124 AFTER wager_amount");
-			$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN IF NOT EXISTS transaction_type_code VARCHAR(10) NOT NULL DEFAULT '8124' AFTER transaction_type");
+			$creditTypeColumn = $conn->query("SHOW COLUMNS FROM admin_balance_credits LIKE 'transaction_type'");
+			if ($creditTypeColumn && $creditTypeColumn->num_rows === 0) {
+				$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN transaction_type INT NOT NULL DEFAULT 124 AFTER wager_amount");
+			}
+			$creditTypeCodeColumn = $conn->query("SHOW COLUMNS FROM admin_balance_credits LIKE 'transaction_type_code'");
+			if ($creditTypeCodeColumn && $creditTypeCodeColumn->num_rows === 0) {
+				$conn->query("ALTER TABLE admin_balance_credits ADD COLUMN transaction_type_code VARCHAR(10) NOT NULL DEFAULT '8124' AFTER transaction_type");
+			}
 
 			header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
