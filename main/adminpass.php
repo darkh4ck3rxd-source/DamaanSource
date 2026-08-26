@@ -5,17 +5,36 @@
 	}
 ?>
 <?php
-	include ("conn.php");
-	
-	if(isset($_POST['newupi'])){
-		$upiid = mysqli_real_escape_string($conn, $_POST['newupi']);
-		$sql_q = "UPDATE nirvahaka_shonu SET guptapada='".md5($upiid)."' WHERE unohs='1'";
-		$chk = mysqli_query($conn, $sql_q);
-		if($chk){
-			echo '<script type="text/JavaScript"> alert("Password Updated"); </script>';
-		}else {echo '<script type="text/JavaScript"> alert("Failed"); </script>';}
-	}		
-?>
+		include ("conn.php");
+
+		$credentialMessage = '';
+		$credentialMessageType = 'success';
+		if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newusername'], $_POST['newupi'])) {
+			$newUsername = trim((string)$_POST['newusername']);
+			$newPassword = (string)$_POST['newupi'];
+			if ($newUsername === '' || !preg_match('/^[A-Za-z0-9_.-]{3,64}$/', $newUsername) || $newPassword === '') {
+				$credentialMessage = 'Username 3-64 letters/numbers ke saath aur password required hai.';
+				$credentialMessageType = 'danger';
+			} else {
+				$stmt = $conn->prepare('UPDATE nirvahaka_shonu SET nirvahaka_hesaru = ?, guptapada = ? WHERE unohs = 1 LIMIT 1');
+				$hashedPassword = md5($newPassword);
+				if ($stmt) {
+					$stmt->bind_param('ss', $newUsername, $hashedPassword);
+					$updated = $stmt->execute();
+					$stmt->close();
+				} else {
+					$updated = false;
+				}
+				if ($updated) {
+					$_SESSION['nirvahaka_hesaru'] = $newUsername;
+					$credentialMessage = 'Admin username aur password successfully update ho gaye.';
+				} else {
+					$credentialMessage = 'Credentials update nahi ho paaye.';
+					$credentialMessageType = 'danger';
+				}
+			}
+		}
+	?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -132,18 +151,24 @@
         <div class="content-wrapper">
           <div class="row">
             <div class="col-sm-12 mb-4 mb-xl-0">
-              <h4 class="font-weight-bold text-dark">Update admin password</h4>
+				  <h4 class="font-weight-bold text-dark">Update admin username and password</h4>
             </div>
           </div> 
 		  <div class="row">
-			<form action="#" id="upiform" method="post" autocomplete="off">
-				<div class="d-flex align-items-center">	
-					<input name="newupi" type="text" placeholder="Enter New Password" class="flex-grow-1 cool-input" style="height: 40px;" />
-				</div>
-				<div class="d-flex align-items-center mt-3">
-					<button type="submit" class="btn btn-primary cool-button mr-2">Update</button>
-				</div>
-			</form>
+				<?php if ($credentialMessage !== ''): ?>
+					<div class="alert alert-<?= htmlspecialchars($credentialMessageType, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($credentialMessage, ENT_QUOTES, 'UTF-8') ?></div>
+				<?php endif; ?>
+				<form action="#" id="upiform" method="post" autocomplete="off">
+					<div class="d-flex align-items-center">
+						<input name="newusername" type="text" placeholder="Enter New Username" class="flex-grow-1 cool-input" style="height: 40px;" value="<?= htmlspecialchars((string)($_SESSION['nirvahaka_hesaru'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" required />
+					</div>
+					<div class="d-flex align-items-center mt-3">
+						<input name="newupi" type="password" placeholder="Enter New Password" class="flex-grow-1 cool-input" style="height: 40px;" required />
+					</div>
+					<div class="d-flex align-items-center mt-3">
+						<button type="submit" class="btn btn-primary cool-button mr-2">Update Credentials</button>
+					</div>
+				</form>
           </div>		  		  					  		  		  
         </div>
         <footer class="footer">
