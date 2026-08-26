@@ -1756,7 +1756,8 @@
                                 if (!$dateIndex || $dateIndex->num_rows === 0) {
                                     $conn->query("ALTER TABLE subordinate_metric_overrides ADD UNIQUE KEY subordinate_user_metric_date (user_id, metric_key, metric_date)");
                                 }
-                                $summaryTargetId = ($shonupost['userId'] === '') ? (int)$shonuid : (int)$shonupost['userId'];
+                                $requestedUserId = isset($shonupost['userId']) ? (int)$shonupost['userId'] : 0;
+                                $summaryTargetId = $requestedUserId > 0 ? $requestedUserId : (int)$shonuid;
                                 $overrideDate = date('Y-m-d', strtotime($day));
                                 $legacyMetricDate = '1000-01-01';
                                 $summaryKeys = [
