@@ -34,6 +34,7 @@ ensure_wager_adjustments_table($conn);
     .table td, .table th { vertical-align:middle; white-space:nowrap; }
     .badge-add { background:#d9f5e3; color:#17763a; padding:5px 8px; border-radius:4px; }
     .badge-remove { background:#ffe1e1; color:#a51d1d; padding:5px 8px; border-radius:4px; }
+    .badge-waive { background:#fff0c2; color:#805b00; padding:5px 8px; border-radius:4px; }
     @media (max-width: 576px) { .wager-card { padding:16px; } .wager-actions button { width:100%; } }
   </style>
 </head>
@@ -74,7 +75,7 @@ ensure_wager_adjustments_table($conn);
             <div class="col-md-7 grid-margin stretch-card">
               <div class="wager-card w-100">
                 <h5>Manage required betting amount</h5>
-                <p class="wager-help">Enter a user UID, look up the account, then add or remove a manual amount from that user’s “Need to bet” requirement. This does not change wallet balance.</p>
+                <p class="wager-help">Enter a user UID and look up the account. Manual Add/Remove changes only the manual adjustment. The separate Waive button can clear the current deposit-derived requirement for that UID; it does not change wallet balance or deposit records.</p>
                 <form id="lookup-form" autocomplete="off">
                   <div class="form-group">
                     <label for="uid">User UID</label>
@@ -90,6 +91,7 @@ ensure_wager_adjustments_table($conn);
                   <div><strong>Current required wager:</strong> <span class="current" id="user-current">₹0.00</span></div>
                   <div><strong>Normal remaining wager:</strong> <span id="user-normal">₹0.00</span></div>
                   <div><strong>Manual adjustment:</strong> <span id="user-manual">₹0.00</span></div>
+                  <div><strong>Deposit wager waived:</strong> <span id="user-waived">₹0.00</span></div>
                   <div class="text-muted small mt-2">Completed deposits: ₹<span id="user-deposits">0.00</span> · Investments: ₹<span id="user-investments">0.00</span> · Total bets: ₹<span id="user-bets">0.00</span></div>
                 </div>
                 <form id="adjust-form" autocomplete="off" style="display:none;">
@@ -105,6 +107,7 @@ ensure_wager_adjustments_table($conn);
                   <div class="wager-actions">
                     <button type="button" id="add-btn" class="btn btn-success"><i class="fa fa-plus"></i> Add wager</button>
                     <button type="button" id="remove-btn" class="btn btn-danger"><i class="fa fa-minus"></i> Remove wager</button>
+                    <button type="button" id="waive-btn" class="btn btn-warning"><i class="fa fa-check"></i> Waive deposit wager</button>
                   </div>
                 </form>
                 <div id="status-message" class="status-message" role="status"></div>
@@ -114,8 +117,8 @@ ensure_wager_adjustments_table($conn);
               <div class="wager-card w-100">
                 <h5>How it works</h5>
                 <p class="wager-help">Add increases the user’s required betting amount. Remove decreases only the manual amount previously added by an administrator.</p>
-                <p class="wager-help">For example, if the normal requirement is ₹500 and you add ₹200, Withdraw will show “Need to bet ₹700”. Removing ₹200 returns it to the normal requirement.</p>
-                <p class="wager-help mb-0">The system prevents removing more than the current manual adjustment and keeps every change in the history below.</p>
+                <p class="wager-help">Waive deposit wager records the amount that is being waived and lowers the normal deposit-derived requirement for this UID. It does not alter deposits, bets, or wallet balance.</p>
+                <p class="wager-help mb-0">Every manual adjustment and deposit-wager waiver is recorded with UID, admin session, time, and remark.</p>
               </div>
             </div>
           </div>
@@ -127,6 +130,19 @@ ensure_wager_adjustments_table($conn);
                   <table class="table table-bordered table-striped" id="history-table">
                     <thead><tr><th>Date</th><th>UID</th><th>Mobile</th><th>Operation</th><th>Amount</th><th>Note</th><th>Admin</th></tr></thead>
                     <tbody><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+              <div class="wager-card w-100">
+                <h5>Deposit-wager waiver history</h5>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="waiver-history-table">
+                    <thead><tr><th>Date</th><th>UID</th><th>Mobile</th><th>Waived amount</th><th>Note</th><th>Admin</th></tr></thead>
+                    <tbody><tr><td colspan="6" class="text-center">Loading...</td></tr></tbody>
                   </table>
                 </div>
               </div>
@@ -167,6 +183,7 @@ ensure_wager_adjustments_table($conn);
         $('user-current').textContent = '₹' + user.currentRequiredWager;
         $('user-normal').textContent = '₹' + user.normalRequiredWager;
         $('user-manual').textContent = '₹' + user.currentManualAdjustment;
+        $('user-waived').textContent = '₹' + (user.waivedDepositWager || '0.00');
         $('user-deposits').textContent = user.completedDeposits;
         $('user-investments').textContent = user.investments;
         $('user-bets').textContent = user.totalBets;
@@ -177,6 +194,12 @@ ensure_wager_adjustments_table($conn);
         showUser(payload.user);
         if (!quiet) status('User found. Current required wager: ₹' + payload.user.currentRequiredWager, false);
         return payload.user;
+      };
+      const loadWaiverHistory = async () => {
+        const payload = await request({action: 'waiver_history'});
+        const body = $('waiver-history-table').querySelector('tbody');
+        if (!payload.rows.length) { body.innerHTML = '<tr><td colspan="6" class="text-center">No deposit-wager waivers yet</td></tr>'; return; }
+        body.innerHTML = payload.rows.map((row) => '<tr><td>' + row.created_at + '</td><td>' + row.userid + '</td><td>' + (row.mobile || '-') + '</td><td>₹' + Number(row.amount).toFixed(2) + '</td><td>' + (row.note || '-') + '</td><td>' + (row.admin_session || '-') + '</td></tr>').join('');
       };
       const loadHistory = async () => {
         const payload = await request({action: 'history'});
@@ -205,8 +228,21 @@ ensure_wager_adjustments_table($conn);
         await loadHistory();
       };
       $('add-btn').addEventListener('click', async () => { try { await adjust('add'); } catch (error) { status(error.message, true); } });
-      $('remove-btn').addEventListener('click', async () => { if (!window.confirm('Remove this wager amount from the selected UID?')) return; try { await adjust('remove'); } catch (error) { status(error.message, true); } });
+      $('remove-btn').addEventListener('click', async () => { if (!window.confirm('Remove this manual wager amount from the selected UID?')) return; try { await adjust('remove'); } catch (error) { status(error.message, true); } });
+      $('waive-btn').addEventListener('click', async () => {
+        const uid = $('adjust-uid').value;
+        if (!uid) { status('Look up a UID first', true); return; }
+        if (!window.confirm('Waive this UID’s current deposit-derived wager? This changes withdrawal eligibility but not wallet balance or deposits.')) return;
+        try {
+          const payload = await request({action: 'waive_deposit', uid: uid, note: $('note').value.trim()});
+          status(payload.message + '. Current required wager: ₹' + Number(payload.requiredWager || 0).toFixed(2), false);
+          $('note').value = '';
+          await lookup(uid, true);
+          await loadWaiverHistory();
+        } catch (error) { status(error.message, true); }
+      });
       loadHistory().catch((error) => status(error.message, true));
+      loadWaiverHistory().catch((error) => status(error.message, true));
     }());
   </script>
 </body>

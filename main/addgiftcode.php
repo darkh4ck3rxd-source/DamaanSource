@@ -6,7 +6,13 @@ if ($_SESSION['unohs'] == null) {
 
 include("conn.php");
 
-function generateRandomSerial($length = 32) {
+// Keep the gift-code table compatible with the optional wager metadata.
+$wagerColumn = mysqli_query($conn, "SHOW COLUMNS FROM hodike_nirvahaka LIKE 'wager_amount'");
+if ($wagerColumn && mysqli_num_rows($wagerColumn) === 0) {
+    mysqli_query($conn, "ALTER TABLE hodike_nirvahaka ADD COLUMN wager_amount DECIMAL(18,2) NOT NULL DEFAULT 0 AFTER prix");
+}
+
+	function generateRandomSerial($length = 32) {
     $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
     $randomString = '';
@@ -22,11 +28,19 @@ function generateRandomSerial($length = 32) {
 
 // Handling form submission to generate codes
 // Handling form submission to generate codes
-if (isset($_POST['maxserials']) && isset($_POST['maxusers']) && isset($_POST['price'])) {
-    $maxserials = mysqli_real_escape_string($conn, $_POST['maxserials']);
-    $maxusers = mysqli_real_escape_string($conn, $_POST['maxusers']);
-    $price = mysqli_real_escape_string($conn, $_POST['price']);
-    $remark = mysqli_real_escape_string($conn, $_POST['remark']);
+if (isset($_POST['maxserials']) && isset($_POST['maxusers']) && isset($_POST['price']) && isset($_POST['wager_amount'])) {
+    $maxserials = max(1, (int)$_POST['maxserials']);
+    $maxusers = max(1, (int)$_POST['maxusers']);
+    $price = trim((string)$_POST['price']);
+    $wagerAmount = trim((string)$_POST['wager_amount']);
+    $remark = trim(substr((string)($_POST['remark'] ?? ''), 0, 255));
+
+    if (!is_numeric($price) || (float)$price < 0 || !is_numeric($wagerAmount) || (float)$wagerAmount < 0 || $remark === '') {
+        echo '<script>alert("Enter valid price, wager amount and remark.");</script>';
+        exit;
+    }
+    $price = number_format((float)$price, 2, '.', '');
+    $wagerAmount = number_format((float)$wagerAmount, 2, '.', '');
 
     // Check if maxserials is greater than 50
     if ($maxserials > 50) {
@@ -45,8 +59,8 @@ if (isset($_POST['maxserials']) && isset($_POST['maxusers']) && isset($_POST['pr
         $generatedSerials[] = $newSerial;
 
         // Insert the generated serial into the database
-        $insertRandomSerial = "INSERT INTO hodike_nirvahaka (enserie, utilisateurmax, prix, nombredutilisateurs, creerunrendezvous, shonu, remark) 
-                               VALUES ('".$newSerial."', '".$maxusers."', '".$price."', '".$totalusers."', '".$createdate."', '".$status."', '".$remark."')";
+        $insertRandomSerial = "INSERT INTO hodike_nirvahaka (enserie, utilisateurmax, prix, wager_amount, nombredutilisateurs, creerunrendezvous, shonu, remark)
+                               VALUES ('" . mysqli_real_escape_string($conn, $newSerial) . "', '" . (int)$maxusers . "', '" . mysqli_real_escape_string($conn, $price) . "', '" . mysqli_real_escape_string($conn, $wagerAmount) . "', '" . $totalusers . "', '" . mysqli_real_escape_string($conn, $createdate) . "', '" . $status . "', '" . mysqli_real_escape_string($conn, $remark) . "')";
         mysqli_query($conn, $insertRandomSerial);
     }
 
@@ -101,11 +115,14 @@ if (isset($_POST['delete_serial'])) {
             <div class="mb-3">
                 <input name="maxusers" type="number" placeholder="Enter Maximum Users" required class="form-control" style="height: 40px;" />
             </div>
-          <div class="mb-3">
-                <input name="remark" type="name" placeholder="add remark" required class="form-control" style="height: 40px;" />
+            <div class="mb-3">
+                <input name="price" type="number" min="0" step="0.01" placeholder="Enter Price" required class="form-control" style="height: 40px;" />
             </div>
             <div class="mb-3">
-                <input name="price" type="number" placeholder="Enter Price" required class="form-control" style="height: 40px;" />
+                <input name="wager_amount" type="number" min="0" step="0.01" value="0" placeholder="Wager amount for this gift code" required class="form-control" style="height: 40px;" />
+            </div>
+            <div class="mb-3">
+                <input name="remark" type="text" maxlength="255" placeholder="Add remark" required class="form-control" style="height: 40px;" />
             </div>
             <button type="submit" class="btn btn-primary">Generate Gift Codes</button>
         </form>
@@ -140,6 +157,8 @@ if (isset($_POST['delete_serial'])) {
                     <th>Serial Code</th>
                     <th>Max Users</th>
                     <th>Price</th>
+                    <th>Wager</th>
+                    <th>Remark</th>
                     <th>Created At</th>
                     <th>Action</th>
                 </tr>
@@ -149,8 +168,10 @@ if (isset($_POST['delete_serial'])) {
                     <tr>
                         <td><?php echo $row['enserie']; ?></td>
                         <td><?php echo $row['utilisateurmax']; ?></td>
-                        <td><?php echo $row['prix']; ?></td>
-                        <td><?php echo $row['creerunrendezvous']; ?></td>
+                        <td><?php echo htmlspecialchars((string)$row['prix'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars((string)($row['wager_amount'] ?? '0.00'), ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars((string)($row['remark'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars((string)$row['creerunrendezvous'], ENT_QUOTES, 'UTF-8'); ?></td>
                         <td>
                             <form method="post" action="">
                                 <input type="hidden" name="delete_serial" value="<?php echo $row['enserie']; ?>" />

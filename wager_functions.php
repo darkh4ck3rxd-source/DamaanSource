@@ -23,6 +23,44 @@ function ensure_wager_adjustments_table(mysqli $conn): bool
     return (bool) $conn->query($sql);
 }
 
+function ensure_wager_waivers_tables(mysqli $conn): bool
+{
+    $currentSql = "CREATE TABLE IF NOT EXISTS wager_waivers (
+        userid INT NOT NULL,
+        waived_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        updated_by VARCHAR(120) NOT NULL DEFAULT '',
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (userid)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    $historySql = "CREATE TABLE IF NOT EXISTS wager_waiver_history (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        userid INT NOT NULL,
+        amount DECIMAL(18,2) NOT NULL,
+        note VARCHAR(255) NOT NULL DEFAULT '',
+        admin_session VARCHAR(120) NOT NULL DEFAULT '',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_wager_waiver_user_created (userid, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    return (bool) $conn->query($currentSql) && (bool) $conn->query($historySql);
+}
+
+function get_wager_waived_amount(mysqli $conn, int $userid): float
+{
+    if (!ensure_wager_waivers_tables($conn)) {
+        return 0.0;
+    }
+    $stmt = $conn->prepare('SELECT waived_amount FROM wager_waivers WHERE userid = ? LIMIT 1');
+    if (!$stmt) {
+        return 0.0;
+    }
+    $stmt->bind_param('i', $userid);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return max(0.0, (float) ($row['waived_amount'] ?? 0));
+}
+
 function get_wager_adjustment(mysqli $conn, int $userid): float
 {
     if (!ensure_wager_adjustments_table($conn)) {
@@ -89,16 +127,76 @@ function get_wager_summary(mysqli $conn, int $userid): array
     }
 
     $manualAdjustment = get_wager_adjustment($conn, $userid);
+    $waivedAmount = get_wager_waived_amount($conn, $userid);
     $normalRequired = max(0.0, $completedDeposits + $investments - $totalBets);
-    $required = max(0.0, $completedDeposits + $investments + $manualAdjustment - $totalBets);
+    $waivedNormalRequired = max(0.0, $normalRequired - $waivedAmount);
+    $required = max(0.0, $waivedNormalRequired + $manualAdjustment);
 
     return [
         'completedDeposits' => $completedDeposits,
         'investments' => $investments,
         'totalBets' => $totalBets,
         'manualAdjustment' => $manualAdjustment,
+        'waivedAmount' => $waivedAmount,
         'normalRequired' => $normalRequired,
+        'waivedNormalRequired' => $waivedNormalRequired,
         'required' => $required,
+    ];
+}
+
+function waive_current_deposit_wager(mysqli $conn, int $userid, string $adminSession, string $note = ''): array
+{
+    if (!ensure_wager_waivers_tables($conn)) {
+        return ['ok' => false, 'message' => 'Unable to prepare wager waiver storage'];
+    }
+    if (!find_wager_user($conn, $userid)) {
+        return ['ok' => false, 'message' => 'UID not found'];
+    }
+
+    $summary = get_wager_summary($conn, $userid);
+    $amount = max(0.0, (float) $summary['normalRequired'] - (float) $summary['waivedAmount']);
+    if ($amount <= 0) {
+        return ['ok' => false, 'message' => 'No unwaived deposit wager remains for this UID'];
+    }
+
+    $nextWaived = (float) $summary['waivedAmount'] + $amount;
+    $note = trim(substr($note, 0, 255));
+    $adminSession = substr($adminSession, 0, 120);
+    $conn->begin_transaction();
+    try {
+        $currentStmt = $conn->prepare('INSERT INTO wager_waivers (userid, waived_amount, updated_by) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE waived_amount = VALUES(waived_amount), updated_by = VALUES(updated_by)');
+        if (!$currentStmt) {
+            throw new RuntimeException('Unable to save wager waiver');
+        }
+        $currentStmt->bind_param('ids', $userid, $nextWaived, $adminSession);
+        if (!$currentStmt->execute()) {
+            $currentStmt->close();
+            throw new RuntimeException('Unable to save wager waiver');
+        }
+        $currentStmt->close();
+
+        $historyStmt = $conn->prepare('INSERT INTO wager_waiver_history (userid, amount, note, admin_session) VALUES (?, ?, ?, ?)');
+        if (!$historyStmt) {
+            throw new RuntimeException('Unable to save wager waiver history');
+        }
+        $historyStmt->bind_param('idss', $userid, $amount, $note, $adminSession);
+        if (!$historyStmt->execute()) {
+            $historyStmt->close();
+            throw new RuntimeException('Unable to save wager waiver history');
+        }
+        $historyStmt->close();
+        $conn->commit();
+    } catch (Throwable $error) {
+        $conn->rollback();
+        return ['ok' => false, 'message' => $error->getMessage() ?: 'Unable to save wager waiver'];
+    }
+
+    $updatedSummary = get_wager_summary($conn, $userid);
+    return [
+        'ok' => true,
+        'message' => 'Deposit-derived wager waived',
+        'waivedAmount' => number_format($updatedSummary['waivedAmount'], 2, '.', ''),
+        'requiredWager' => number_format($updatedSummary['required'], 2, '.', ''),
     ];
 }
 
