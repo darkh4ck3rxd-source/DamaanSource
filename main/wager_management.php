@@ -35,6 +35,7 @@ ensure_wager_adjustments_table($conn);
     .badge-add { background:#d9f5e3; color:#17763a; padding:5px 8px; border-radius:4px; }
     .badge-remove { background:#ffe1e1; color:#a51d1d; padding:5px 8px; border-radius:4px; }
     .badge-waive { background:#fff0c2; color:#805b00; padding:5px 8px; border-radius:4px; }
+    .badge-clear { background:#e4ddff; color:#4d2aa8; padding:5px 8px; border-radius:4px; }
     @media (max-width: 576px) { .wager-card { padding:16px; } .wager-actions button { width:100%; } }
   </style>
 </head>
@@ -108,6 +109,7 @@ ensure_wager_adjustments_table($conn);
                     <button type="button" id="add-btn" class="btn btn-success"><i class="fa fa-plus"></i> Add wager</button>
                     <button type="button" id="remove-btn" class="btn btn-danger"><i class="fa fa-minus"></i> Remove wager</button>
                     <button type="button" id="waive-btn" class="btn btn-warning"><i class="fa fa-check"></i> Waive deposit wager</button>
+                    <button type="button" id="clear-all-btn" class="btn btn-info"><i class="fa fa-eraser"></i> Clear all wager</button>
                   </div>
                 </form>
                 <div id="status-message" class="status-message" role="status"></div>
@@ -118,7 +120,7 @@ ensure_wager_adjustments_table($conn);
                 <h5>How it works</h5>
                 <p class="wager-help">Add increases the user’s required betting amount. Remove decreases only the manual amount previously added by an administrator.</p>
                 <p class="wager-help">Waive deposit wager records the amount that is being waived and lowers the normal deposit-derived requirement for this UID. It does not alter deposits, bets, or wallet balance.</p>
-                <p class="wager-help mb-0">Every manual adjustment and deposit-wager waiver is recorded with UID, admin session, time, and remark.</p>
+                <p class="wager-help mb-0"><strong>Clear all wager</strong> clears the selected UID’s current remaining normal and manual wager together. It does not alter wallet balance, deposits, investments, or bets. Every action is audited with UID, admin session, time, amount, and remark.</p>
               </div>
             </div>
           </div>
@@ -130,6 +132,19 @@ ensure_wager_adjustments_table($conn);
                   <table class="table table-bordered table-striped" id="history-table">
                     <thead><tr><th>Date</th><th>UID</th><th>Mobile</th><th>Operation</th><th>Amount</th><th>Note</th><th>Admin</th></tr></thead>
                     <tbody><tr><td colspan="7" class="text-center">Loading...</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+              <div class="wager-card w-100">
+                <h5>Clear-all wager history</h5>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="clear-history-table">
+                    <thead><tr><th>Date</th><th>UID</th><th>Mobile</th><th>Normal</th><th>Manual</th><th>Total</th><th>Note</th><th>Admin</th></tr></thead>
+                    <tbody><tr><td colspan="8" class="text-center">Loading...</td></tr></tbody>
                   </table>
                 </div>
               </div>
@@ -201,6 +216,12 @@ ensure_wager_adjustments_table($conn);
         if (!payload.rows.length) { body.innerHTML = '<tr><td colspan="6" class="text-center">No deposit-wager waivers yet</td></tr>'; return; }
         body.innerHTML = payload.rows.map((row) => '<tr><td>' + row.created_at + '</td><td>' + row.userid + '</td><td>' + (row.mobile || '-') + '</td><td>₹' + Number(row.amount).toFixed(2) + '</td><td>' + (row.note || '-') + '</td><td>' + (row.admin_session || '-') + '</td></tr>').join('');
       };
+      const loadClearHistory = async () => {
+        const payload = await request({action: 'clear_history'});
+        const body = $('clear-history-table').querySelector('tbody');
+        if (!payload.rows.length) { body.innerHTML = '<tr><td colspan="8" class="text-center">No clear-all actions yet</td></tr>'; return; }
+        body.innerHTML = payload.rows.map((row) => '<tr><td>' + row.created_at + '</td><td>' + row.userid + '</td><td>' + (row.mobile || '-') + '</td><td>₹' + Number(row.normal_amount).toFixed(2) + '</td><td>₹' + Number(row.manual_amount).toFixed(2) + '</td><td>₹' + Number(row.total_amount).toFixed(2) + '</td><td>' + (row.note || '-') + '</td><td>' + (row.admin_session || '-') + '</td></tr>').join('');
+      };
       const loadHistory = async () => {
         const payload = await request({action: 'history'});
         const body = $('history-table').querySelector('tbody');
@@ -229,6 +250,18 @@ ensure_wager_adjustments_table($conn);
       };
       $('add-btn').addEventListener('click', async () => { try { await adjust('add'); } catch (error) { status(error.message, true); } });
       $('remove-btn').addEventListener('click', async () => { if (!window.confirm('Remove this manual wager amount from the selected UID?')) return; try { await adjust('remove'); } catch (error) { status(error.message, true); } });
+      $('clear-all-btn').addEventListener('click', async () => {
+        const uid = $('adjust-uid').value;
+        if (!uid) { status('Look up a UID first', true); return; }
+        if (!window.confirm('Clear ALL current wager for this UID? This changes withdrawal eligibility but not wallet balance, deposits, investments, or bets.')) return;
+        try {
+          const payload = await request({action: 'clear_all', uid: uid, note: $('note').value.trim()});
+          status(payload.message + ' ₹' + Number(payload.clearedAmount || 0).toFixed(2) + '. Current required wager: ₹' + Number(payload.requiredWager || 0).toFixed(2), false);
+          $('note').value = '';
+          await lookup(uid, true);
+          await loadClearHistory();
+        } catch (error) { status(error.message, true); }
+      });
       $('waive-btn').addEventListener('click', async () => {
         const uid = $('adjust-uid').value;
         if (!uid) { status('Look up a UID first', true); return; }
@@ -243,6 +276,7 @@ ensure_wager_adjustments_table($conn);
       });
       loadHistory().catch((error) => status(error.message, true));
       loadWaiverHistory().catch((error) => status(error.message, true));
+      loadClearHistory().catch((error) => status(error.message, true));
     }());
   </script>
 </body>

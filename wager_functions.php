@@ -45,6 +45,31 @@ function ensure_wager_waivers_tables(mysqli $conn): bool
     return (bool) $conn->query($currentSql) && (bool) $conn->query($historySql);
 }
 
+function ensure_wager_clear_tables(mysqli $conn): bool
+{
+    $currentSql = "CREATE TABLE IF NOT EXISTS wager_clear_state (
+        userid INT NOT NULL,
+        normal_cleared_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        manual_cleared_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        updated_by VARCHAR(120) NOT NULL DEFAULT '',
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (userid)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    $historySql = "CREATE TABLE IF NOT EXISTS wager_clear_history (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        userid INT NOT NULL,
+        normal_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        manual_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        total_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+        note VARCHAR(255) NOT NULL DEFAULT '',
+        admin_session VARCHAR(120) NOT NULL DEFAULT '',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_wager_clear_user_created (userid, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    return (bool) $conn->query($currentSql) && (bool) $conn->query($historySql);
+}
+
 function get_wager_waived_amount(mysqli $conn, int $userid): float
 {
     if (!ensure_wager_waivers_tables($conn)) {
@@ -78,6 +103,25 @@ function get_wager_adjustment(mysqli $conn, int $userid): float
     $stmt->close();
 
     return max(0.0, (float) ($row['adjustment'] ?? 0));
+}
+
+function get_wager_clear_state(mysqli $conn, int $userid): array
+{
+    if (!ensure_wager_clear_tables($conn)) {
+        return ['normalClearedAmount' => 0.0, 'manualClearedAmount' => 0.0];
+    }
+    $stmt = $conn->prepare('SELECT normal_cleared_amount, manual_cleared_amount FROM wager_clear_state WHERE userid = ? LIMIT 1');
+    if (!$stmt) {
+        return ['normalClearedAmount' => 0.0, 'manualClearedAmount' => 0.0];
+    }
+    $stmt->bind_param('i', $userid);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return [
+        'normalClearedAmount' => max(0.0, (float) ($row['normal_cleared_amount'] ?? 0)),
+        'manualClearedAmount' => max(0.0, (float) ($row['manual_cleared_amount'] ?? 0)),
+    ];
 }
 
 function wager_sum(mysqli $conn, string $table, string $userColumn, string $amountColumn, int $userid, string $extraWhere = ''): float
@@ -128,9 +172,12 @@ function get_wager_summary(mysqli $conn, int $userid): array
 
     $manualAdjustment = get_wager_adjustment($conn, $userid);
     $waivedAmount = get_wager_waived_amount($conn, $userid);
+    $clearState = get_wager_clear_state($conn, $userid);
     $normalRequired = max(0.0, $completedDeposits + $investments - $totalBets);
     $waivedNormalRequired = max(0.0, $normalRequired - $waivedAmount);
-    $required = max(0.0, $waivedNormalRequired + $manualAdjustment);
+    $remainingNormalRequired = max(0.0, $waivedNormalRequired - $clearState['normalClearedAmount']);
+    $remainingManualAdjustment = max(0.0, $manualAdjustment - $clearState['manualClearedAmount']);
+    $required = max(0.0, $remainingNormalRequired + $remainingManualAdjustment);
 
     return [
         'completedDeposits' => $completedDeposits,
@@ -140,6 +187,10 @@ function get_wager_summary(mysqli $conn, int $userid): array
         'waivedAmount' => $waivedAmount,
         'normalRequired' => $normalRequired,
         'waivedNormalRequired' => $waivedNormalRequired,
+        'remainingNormalRequired' => $remainingNormalRequired,
+        'remainingManualAdjustment' => $remainingManualAdjustment,
+        'normalClearedAmount' => $clearState['normalClearedAmount'],
+        'manualClearedAmount' => $clearState['manualClearedAmount'],
         'required' => $required,
     ];
 }
@@ -154,7 +205,7 @@ function waive_current_deposit_wager(mysqli $conn, int $userid, string $adminSes
     }
 
     $summary = get_wager_summary($conn, $userid);
-    $amount = max(0.0, (float) $summary['normalRequired'] - (float) $summary['waivedAmount']);
+    $amount = max(0.0, (float) $summary['normalRequired'] - (float) $summary['waivedAmount'] - (float) $summary['normalClearedAmount']);
     if ($amount <= 0) {
         return ['ok' => false, 'message' => 'No unwaived deposit wager remains for this UID'];
     }
@@ -196,6 +247,67 @@ function waive_current_deposit_wager(mysqli $conn, int $userid, string $adminSes
         'ok' => true,
         'message' => 'Deposit-derived wager waived',
         'waivedAmount' => number_format($updatedSummary['waivedAmount'], 2, '.', ''),
+        'requiredWager' => number_format($updatedSummary['required'], 2, '.', ''),
+    ];
+}
+
+function clear_all_wager(mysqli $conn, int $userid, string $adminSession, string $note = ''): array
+{
+    if (!ensure_wager_clear_tables($conn)) {
+        return ['ok' => false, 'message' => 'Unable to prepare clear-all wager storage'];
+    }
+    if (!find_wager_user($conn, $userid)) {
+        return ['ok' => false, 'message' => 'UID not found'];
+    }
+
+    $summary = get_wager_summary($conn, $userid);
+    $normalAmount = max(0.0, (float) $summary['remainingNormalRequired']);
+    $manualAmount = max(0.0, (float) $summary['remainingManualAdjustment']);
+    $totalAmount = $normalAmount + $manualAmount;
+    if ($totalAmount <= 0) {
+        return ['ok' => false, 'message' => 'No remaining wager exists for this UID'];
+    }
+
+    $state = get_wager_clear_state($conn, $userid);
+    $nextNormal = $state['normalClearedAmount'] + $normalAmount;
+    $nextManual = $state['manualClearedAmount'] + $manualAmount;
+    $note = trim(substr($note, 0, 255));
+    $adminSession = substr($adminSession, 0, 120);
+
+    $conn->begin_transaction();
+    try {
+        $currentStmt = $conn->prepare('INSERT INTO wager_clear_state (userid, normal_cleared_amount, manual_cleared_amount, updated_by) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE normal_cleared_amount = VALUES(normal_cleared_amount), manual_cleared_amount = VALUES(manual_cleared_amount), updated_by = VALUES(updated_by)');
+        if (!$currentStmt) {
+            throw new RuntimeException('Unable to save clear-all wager state');
+        }
+        $currentStmt->bind_param('idds', $userid, $nextNormal, $nextManual, $adminSession);
+        if (!$currentStmt->execute()) {
+            $currentStmt->close();
+            throw new RuntimeException('Unable to save clear-all wager state');
+        }
+        $currentStmt->close();
+
+        $historyStmt = $conn->prepare('INSERT INTO wager_clear_history (userid, normal_amount, manual_amount, total_amount, note, admin_session) VALUES (?, ?, ?, ?, ?, ?)');
+        if (!$historyStmt) {
+            throw new RuntimeException('Unable to save clear-all wager history');
+        }
+        $historyStmt->bind_param('idddss', $userid, $normalAmount, $manualAmount, $totalAmount, $note, $adminSession);
+        if (!$historyStmt->execute()) {
+            $historyStmt->close();
+            throw new RuntimeException('Unable to save clear-all wager history');
+        }
+        $historyStmt->close();
+        $conn->commit();
+    } catch (Throwable $error) {
+        $conn->rollback();
+        return ['ok' => false, 'message' => $error->getMessage() ?: 'Unable to clear all wager'];
+    }
+
+    $updatedSummary = get_wager_summary($conn, $userid);
+    return [
+        'ok' => true,
+        'message' => 'All remaining wager cleared',
+        'clearedAmount' => number_format($totalAmount, 2, '.', ''),
         'requiredWager' => number_format($updatedSummary['required'], 2, '.', ''),
     ];
 }

@@ -18,7 +18,7 @@ function wager_json(array $payload, int $status = 200): void
     exit;
 }
 
-if (!ensure_wager_adjustments_table($conn) || !ensure_wager_waivers_tables($conn)) {
+if (!ensure_wager_adjustments_table($conn) || !ensure_wager_waivers_tables($conn) || !ensure_wager_clear_tables($conn)) {
     wager_json(['ok' => false, 'message' => 'Unable to prepare wager storage'], 500);
 }
 
@@ -44,6 +44,8 @@ if ($action === 'lookup') {
     $user['completedDeposits'] = number_format($summary['completedDeposits'], 2, '.', '');
     $user['investments'] = number_format($summary['investments'], 2, '.', '');
     $user['totalBets'] = number_format($summary['totalBets'], 2, '.', '');
+    $user['remainingNormalWager'] = number_format($summary['remainingNormalRequired'], 2, '.', '');
+    $user['remainingManualWager'] = number_format($summary['remainingManualAdjustment'], 2, '.', '');
     wager_json(['ok' => true, 'user' => $user]);
 }
 
@@ -73,6 +75,15 @@ if ($action === 'adjust') {
         $result['requiredWager'] = number_format($summary['required'], 2, '.', '');
         $result['manualAdjustment'] = number_format($summary['manualAdjustment'], 2, '.', '');
     }
+    wager_json($result, $result['ok'] ? 200 : 422);
+}
+
+if ($action === 'clear_all') {
+    if (!$uid) {
+        wager_json(['ok' => false, 'message' => 'Enter a valid UID'], 422);
+    }
+    $note = trim(substr((string) ($_POST['note'] ?? ''), 0, 255));
+    $result = clear_all_wager($conn, (int) $uid, (string) $_SESSION['unohs'], $note);
     wager_json($result, $result['ok'] ? 200 : 422);
 }
 
@@ -111,6 +122,40 @@ if ($action === 'waiver_history') {
     $rows = [];
     while ($result && ($row = $result->fetch_assoc())) {
         $row['amount'] = number_format((float) $row['amount'], 2, '.', '');
+        $rows[] = $row;
+    }
+    $stmt->close();
+    wager_json(['ok' => true, 'rows' => $rows]);
+}
+
+if ($action === 'clear_history') {
+    $sql = "SELECT wch.id, wch.userid, wch.normal_amount, wch.manual_amount, wch.total_amount, wch.note, wch.admin_session, wch.created_at,
+                   ss.mobile
+            FROM wager_clear_history wch
+            LEFT JOIN shonu_subjects ss ON ss.id = wch.userid";
+    $params = [];
+    $types = '';
+    if ($uid) {
+        $sql .= ' WHERE wch.userid = ?';
+        $params[] = (int) $uid;
+        $types = 'i';
+    }
+    $sql .= ' ORDER BY wch.id DESC LIMIT 50';
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        wager_json(['ok' => false, 'message' => 'Unable to load clear-all wager history'], 500);
+    }
+    if ($params) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $rows = [];
+    while ($result && ($row = $result->fetch_assoc())) {
+        $row['normal_amount'] = number_format((float) $row['normal_amount'], 2, '.', '');
+        $row['manual_amount'] = number_format((float) $row['manual_amount'], 2, '.', '');
+        $row['total_amount'] = number_format((float) $row['total_amount'], 2, '.', '');
         $rows[] = $row;
     }
     $stmt->close();
