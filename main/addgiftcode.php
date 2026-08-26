@@ -1,7 +1,8 @@
 <?php
 session_start();
-if ($_SESSION['unohs'] == null) {
+if (empty($_SESSION['unohs'])) {
     header("location:index.php?msg=unauthorized");
+    exit;
 }
 
 include("conn.php");
