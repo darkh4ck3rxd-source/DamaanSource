@@ -303,11 +303,17 @@
 								"typeName": "Partner Rewards",
 								"typeNameCode": "8122"
 							  },
-							  {
-								"type": 123,
-								"typeName": "Issue Canceled",
-								"typeNameCode": "8123"
-							  }
+										{
+									"type": 123,
+									"typeName": "Issue Canceled",
+									"typeNameCode": "8123"
+								  },
+								  {
+									"type": 124,
+									"typeName": "Balance Credit",
+									"typeNameCode": "8124"
+								  }
+
 							]
 						  },
 						  "code": 0,

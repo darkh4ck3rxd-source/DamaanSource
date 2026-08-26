@@ -6,9 +6,21 @@ error_reporting(E_ALL);
 
 
 	include "\x2e\x2e\x2f\x2e\x2e\x2f\x63\x6f\x6e\x6e\x2e\x70\x68\x70";
-	include "\x2e\x2e\x2f\x2e\x2e\x2f\x66\x75\x6e\x63\x74\x69\x6f\x6e\x73\x32\x2e\x70\x68\x70";
-	
-	header('Content-Type: application/json; charset=utf-8');
+		include "\x2e\x2e\x2f\x2e\x2e\x2f\x66\x75\x6e\x63\x74\x69\x6f\x6e\x73\x32\x2e\x70\x68\x70";
+
+		$conn->query("CREATE TABLE IF NOT EXISTS admin_balance_credits (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			userid INT NOT NULL,
+			amount DECIMAL(18,2) NOT NULL,
+			wager_amount DECIMAL(18,2) NOT NULL DEFAULT 0,
+			note VARCHAR(255) NOT NULL DEFAULT '',
+			admin_session VARCHAR(120) NOT NULL DEFAULT '',
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (id),
+			KEY idx_balance_credit_user_created (userid, created_at)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+		header('Content-Type: application/json; charset=utf-8');
 	header('Strict-Transport-Security: max-age=31536000');
 	header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
 	header('Access-Control-Allow-Credentials: true');
@@ -126,7 +138,7 @@ error_reporting(E_ALL);
 								  SELECT dearlord as parichaya, todayblessings as ketebida, 'atb' as phalaphala, todayblessings as sesabida, amen as tiarikala 
 								  FROM cihne WHERE identity = $shonuid
 								  UNION ALL
-								  SELECT shonu as parichaya, motta as ketebida, 'wd' as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala 
+								  SELECT shonu as parichaya, motta as ketebida, CASE WHEN sthiti = 2 THEN 'withdraw_rejected' ELSE 'wd' END as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala
 								  FROM hintegedukolli WHERE balakedara = $shonuid 
 								  UNION ALL
 								  SELECT id as parichaya, motta as ketebida, 'orb' as phalaphala, motta as sesabida, created_at as tiarikala 
@@ -141,9 +153,12 @@ error_reporting(E_ALL);
 								  SELECT id as parichaya, motta as ketebida, 'reftask' as phalaphala, motta as sesabida, time as tiarikala 
 								  FROM noitativni_sonub WHERE arthur = $shonuid AND status = 1 
 								  UNION ALL
-								  SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala 
-								  FROM hodike_balakedara WHERE userkani = $shonuid 
-								  \x4f\x52\x44\x45\x52\x20\x42\x59\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\x20\x44\x45\x53\x43\x20\x4c\x49\x4d\x49\x54\x20$pageSize\x20\x4f\x46\x46\x53\x45\x54\x20$samatolana";
+										SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala
+									  FROM hodike_balakedara WHERE userkani = $shonuid
+									  UNION ALL
+									  SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala
+									  FROM admin_balance_credits WHERE userid = $shonuid
+									  \x4f\x52\x44\x45\x52\x20\x42\x59\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\x20\x44\x45\x53\x43\x20\x4c\x49\x4d\x49\x54\x20$pageSize\x20\x4f\x46\x46\x53\x45\x54\x20$samatolana";
 								$samasyephalitansa = $conn->query($samasye);
 								
 								$samasye_ondu = "SELECT parichaya
@@ -227,12 +242,22 @@ error_reporting(E_ALL);
 								  SELECT id as parichaya
 								  FROM rebetrec WHERE user_id = $shonuid
 								  UNION ALL
-								  SELECT kani as parichaya
-								  FROM hodike_balakedara WHERE userkani = $shonuid";
+									  SELECT kani as parichaya
+									  FROM hodike_balakedara WHERE userkani = $shonuid
+									  UNION ALL
+									  SELECT id as parichaya
+									  FROM admin_balance_credits WHERE userid = $shonuid";
 								$samasyephalitansa_ondu = $conn->query($samasye_ondu);
 								$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 							}
-							else if($type == 0){
+							else if($type == 124){
+									$samasye = "SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasyephalitansa = $conn->query($samasye);
+									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid";
+									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
+									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
+								}
+								else if($type == 0){
 								$samasye = "\x53\x45\x4c\x45\x43\x54\x20\x70\x61\x72\x69\x63\x68\x61\x79\x61\x2c\x20\x6b\x65\x74\x65\x62\x69\x64\x61\x2c\x20\x70\x68\x61\x6c\x61\x70\x68\x61\x6c\x61\x2c\x20\x73\x65\x73\x61\x62\x69\x64\x61\x2c\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\xa\x9\x9\x9\x9\x9\x9\x9\x9\x20\x20\x46\x52\x4f\x4d\x20\x62\x61\x6a\x69\x6b\x61\x74\x74\x75\x74\x74\x61\x74\x65\x20\x57\x48\x45\x52\x45\x20\x62\x79\x61\x62\x61\x68\x61\x72\x6b\x61\x72\x74\x61\x20\x3d\x20$shonuid
 								  \x55\x4e\x49\x4f\x4e\x20\x41\x4c\x4c\xd\xa\x9\x9\x9\x9\x9\x9\x9\x9\x20\x20\x53\x45\x4c\x45\x43\x54\x20\x70\x61\x72\x69\x63\x68\x61\x79\x61\x2c\x20\x6b\x65\x74\x65\x62\x69\x64\x61\x2c\x20\x70\x68\x61\x6c\x61\x70\x68\x61\x6c\x61\x2c\x20\x73\x65\x73\x61\x62\x69\x64\x61\x2c\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\xd\xa\x9\x9\x9\x9\x9\x9\x9\x9\x20\x20\x46\x52\x4f\x4d\x20\x62\x61\x6a\x69\x6b\x61\x74\x74\x75\x74\x74\x61\x74\x65\x5f\x64\x72\x65\x69\x20\x57\x48\x45\x52\x45\x20\x62\x79\x61\x62\x61\x68\x61\x72\x6b\x61\x72\x74\x61\x20\x3d\x20$shonuid
 								  \x55\x4e\x49\x4f\x4e\x20\x41\x4c\x4c\xd\xa\x9\x9\x9\x9\x9\x9\x9\x9\x20\x20\x53\x45\x4c\x45\x43\x54\x20\x70\x61\x72\x69\x63\x68\x61\x79\x61\x2c\x20\x6b\x65\x74\x65\x62\x69\x64\x61\x2c\x20\x70\x68\x61\x6c\x61\x70\x68\x61\x6c\x61\x2c\x20\x73\x65\x73\x61\x62\x69\x64\x61\x2c\x20\x74\x69\x61\x72\x69\x6b\x61\x6c\x61\xd\xa\x9\x9\x9\x9\x9\x9\x9\x9\x20\x20\x46\x52\x4f\x4d\x20\x62\x61\x6a\x69\x6b\x61\x74\x74\x75\x74\x74\x61\x74\x65\x5f\x66\x75\x6e\x66\x20\x57\x48\x45\x52\x45\x20\x62\x79\x61\x62\x61\x68\x61\x72\x6b\x61\x72\x74\x61\x20\x3d\x20$shonuid
@@ -332,7 +357,21 @@ error_reporting(E_ALL);
 								  
 							  }
 
-							else if($type == 5) {
+							else if($type == 9){
+									$samasye = "SELECT shonu as parichaya, motta as ketebida, 'withdraw_rejected' as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala FROM hintegedukolli WHERE balakedara = $shonuid AND sthiti = 2 ORDER BY dinankavannuracisi DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasyephalitansa = $conn->query($samasye);
+									$samasye_ondu = "SELECT shonu as parichaya FROM hintegedukolli WHERE balakedara = $shonuid AND sthiti = 2";
+									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
+									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
+								}
+								else if($type == 9){
+									$samasye = "SELECT shonu as parichaya, motta as ketebida, 'withdraw_rejected' as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala FROM hintegedukolli WHERE balakedara = $shonuid AND sthiti = 2 AND date(dinankavannuracisi) = date('".$date."') ORDER BY dinankavannuracisi DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasyephalitansa = $conn->query($samasye);
+									$samasye_ondu = "SELECT shonu as parichaya FROM hintegedukolli WHERE balakedara = $shonuid AND sthiti = 2 AND date(dinankavannuracisi) = date('".$date."')";
+									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
+									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
+								}
+								else if($type == 5) {
                                 $samasye = "SELECT shonu, motta, dinankavannuracisi, remarks
                                             FROM hintegedukolli 
                                             WHERE balakedara = $shonuid
@@ -501,7 +540,7 @@ error_reporting(E_ALL);
 								  SELECT id as parichaya, prize as ketebida, 'rb' as phalaphala, prize as sesabida, time as tiarikala 
 								  FROM spinrec WHERE user_id = $shonuid AND date(time) = date('".$date."') 
 								  UNION ALL
-								  SELECT shonu as parichaya, motta as ketebida, 'wd' as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala 
+								  SELECT shonu as parichaya, motta as ketebida, CASE WHEN sthiti = 2 THEN 'withdraw_rejected' ELSE 'wd' END as phalaphala, remarks as sesabida, dinankavannuracisi as tiarikala
 								  FROM hintegedukolli WHERE balakedara = $shonuid AND date(dinankavannuracisi) = date('".$date."')
 								  UNION ALL
 								  SELECT dearlord as parichaya, todayblessings as ketebida, 'atb' as phalaphala, todayblessings as sesabida, amen as tiarikala 
@@ -522,9 +561,12 @@ error_reporting(E_ALL);
 								  SELECT id as parichaya, motta as ketebida, 'reftask' as phalaphala, motta as sesabida, time as tiarikala 
 								  FROM noitativni_sonub WHERE arthur = $shonuid AND date(time) = date('".$date."')
 								  UNION ALL
-								  SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala 
-								  FROM hodike_balakedara WHERE userkani = $shonuid AND date(shonu) = date('".$date."') 
-								  ORDER BY tiarikala DESC LIMIT $pageSize OFFSET $samatolana";							
+										SELECT kani as parichaya, price as ketebida, 're' as phalaphala, remark as sesabida, shonu as tiarikala
+									  FROM hodike_balakedara WHERE userkani = $shonuid AND date(shonu) = date('".$date."')
+									  UNION ALL
+									  SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala
+									  FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."')
+									  ORDER BY tiarikala DESC LIMIT $pageSize OFFSET $samatolana";
 								$samasyephalitansa = $conn->query($samasye);
 								
 								$samasye_ondu = "SELECT parichaya
@@ -608,12 +650,22 @@ error_reporting(E_ALL);
 								  SELECT id as parichaya
 								  FROM noitativni_sonub WHERE arthur = $shonuid AND date(time) = date('".$date."')
 								  UNION ALL
-								  SELECT kani as parichaya
-								  FROM hodike_balakedara WHERE userkani = $shonuid AND date(shonu) = date('".$date."')";
+									  SELECT kani as parichaya
+									  FROM hodike_balakedara WHERE userkani = $shonuid AND date(shonu) = date('".$date."')
+									  UNION ALL
+									  SELECT id as parichaya
+									  FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."')";
 								$samasyephalitansa_ondu = $conn->query($samasye_ondu);
 								$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
 							}
-							else if($type == 0){
+							else if($type == 124){
+									$samasye = "SELECT id as parichaya, amount as ketebida, 'balance_credit' as phalaphala, note as sesabida, created_at as tiarikala FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."') ORDER BY created_at DESC LIMIT $pageSize OFFSET $samatolana";
+									$samasyephalitansa = $conn->query($samasye);
+									$samasye_ondu = "SELECT id as parichaya FROM admin_balance_credits WHERE userid = $shonuid AND date(created_at) = date('".$date."')";
+									$samasyephalitansa_ondu = $conn->query($samasye_ondu);
+									$samasyephalitansa_sankhye = mysqli_num_rows($samasyephalitansa_ondu);
+								}
+								else if($type == 0){
 								$samasye = "SELECT parichaya, ketebida, phalaphala, sesabida, tiarikala
 								  FROM bajikattuttate WHERE byabaharkarta = $shonuid AND date(tiarikala) = date('".$date."')
 								  UNION ALL
@@ -845,7 +897,7 @@ error_reporting(E_ALL);
 							}
 						}						
 						
-						if($type == -1 || $type == 0 || $type == 1 || $type == 4 || $type == 119|| $type == 5 || $type == 2 || $type == 3 || $type == 14){
+						if($type == -1 || $type == 0 || $type == 1 || $type == 4 || $type == 119|| $type == 5 || $type == 2 || $type == 3 || $type == 14 || $type == 124 || $type == 9){
 							if ($samasyephalitansa->num_rows > 0) {
 								$i = 0;
 								while ($row = $samasyephalitansa->fetch_assoc()) {
@@ -922,7 +974,15 @@ error_reporting(E_ALL);
 										$data['list'][$i]['remark'] = '';
 									}
 									else{
-										if($row['phalaphala'] == 'gagner'){
+																						if($row['phalaphala'] == 'balance_credit'){
+													$data['list'][$i]['amount'] = $row['ketebida'];
+													$data['list'][$i]['type'] = 124;
+													$data['list'][$i]['typeName'] = 'Balance Credit';
+													$data['list'][$i]['typeNameCode'] = '8124';
+													$data['list'][$i]['orderNum'] = $row['parichaya'];
+													$data['list'][$i]['addTime'] = $row['tiarikala'];
+													$data['list'][$i]['remark'] = $row['sesabida'];
+												}else if($row['phalaphala'] == 'gagner'){
 											$data['list'][$i]['amount'] = $row['sesabida'];
 											$data['list'][$i]['type'] = 2;
 											$data['list'][$i]['typeName'] = 'Jackpot increase';
@@ -1015,7 +1075,15 @@ error_reporting(E_ALL);
 											$data['list'][$i]['addTime'] = $row['tiarikala'];
 											$data['list'][$i]['remark'] = '';
 										}
-										else if($row['phalaphala'] == 'wd'){
+										else if($row['phalaphala'] == 'withdraw_rejected'){
+												$data['list'][$i]['amount'] = $row['ketebida'];
+												$data['list'][$i]['type'] = 9;
+												$data['list'][$i]['typeName'] = 'Withdrawal rejected';
+												$data['list'][$i]['typeNameCode'] = '8009';
+												$data['list'][$i]['orderNum'] = $row['parichaya'];
+												$data['list'][$i]['addTime'] = $row['tiarikala'];
+												$data['list'][$i]['remark'] = $row['sesabida'];
+											}else if($row['phalaphala'] == 'wd'){
 											$data['list'][$i]['amount'] = $row['ketebida'];
 											$data['list'][$i]['type'] = 5;
 											$data['list'][$i]['typeName'] = 'Withdraw';
