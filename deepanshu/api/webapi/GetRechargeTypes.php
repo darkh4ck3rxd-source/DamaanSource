@@ -516,7 +516,7 @@
 							&& trim((string)(getenv('RUPAYEX_API_TOKEN') ?: '')) !== ''
 							&& (getenv('RUPAYEX_ENABLED') === false || trim((string)getenv('RUPAYEX_ENABLED')) === '1');
 						if ((int)$payid === 1 && $rupayexEnabled) {
-							$data['rechargetypelist'][] = [
+							array_unshift($data['rechargetypelist'], [
 								'payTypeID' => 3030,
 								'payID' => 1,
 								'payName' => 'Expert UPI QR',
@@ -543,7 +543,7 @@
 								],
 								'random' => 0.8192269882695508,
 								'sort' => 89999,
-							];
+							]);
 						}
 						$data['banklist'] = null;
 						$data['localUsdtlist'] = null;
