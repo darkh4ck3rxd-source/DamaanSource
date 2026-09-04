@@ -1,5 +1,13 @@
-<?php 
-	// Database connection info 
+<?php
+		session_start();
+		if (empty($_SESSION['unohs'])) {
+			http_response_code(401);
+			header('Content-Type: application/json; charset=utf-8');
+			echo json_encode(['error' => 'Unauthorized']);
+			exit;
+		}
+
+		// Database connection info
 	$dbDetails = array( 
 		'host' => (getenv('MYSQLHOST') ?: 'switchback.proxy.rlwy.net'), 
 		'user' => (getenv('MYSQLUSER') ?: 'root'), 
