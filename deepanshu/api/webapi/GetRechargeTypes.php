@@ -512,19 +512,18 @@
 								unset($rechargeType);
 							}
 						// Rupayex is a separate new deposit channel; existing channels remain unchanged.
-						$rupayexEnabled = trim((string)(getenv('RUPAYEX_DEPOSIT_ENABLED') ?: '0')) === '1'
-							&& trim((string)(getenv('RUPAYEX_API_TOKEN') ?: '')) !== ''
-							&& (getenv('RUPAYEX_ENABLED') === false || trim((string)getenv('RUPAYEX_ENABLED')) === '1');
-						if ((int)$payid === 1 && $rupayexEnabled) {
+$rspaymentEnabled = getenv('RSPAYMENT_ENABLED') === false
+				|| trim((string)getenv('RSPAYMENT_ENABLED')) === '1';
+			if ((int)$payid === 1 && $rspaymentEnabled) {
 							array_unshift($data['rechargetypelist'], [
 								'payTypeID' => 3030,
 								'payID' => 1,
-								'payName' => 'Expert UPI QR',
-								'paySysName' => 'RUPAYEX',
-								'miniPrice' => 1,
-								'maxPrice' => 100000,
-								'scope' => '100|200|500|1000|2000|5000|10000|50000|100000',
-								'paySendUrl' => 'https://www.jalwagames.site/aritsulation/index.php?gateway=rupayex&tyid=3030',
+								'payName' => 'Expert UPI-QR',
+								'paySysName' => 'UPI_QR',
+'miniPrice' => 200,
+									'maxPrice' => 5000,
+								'scope' => '200|300|500|1000|2000|5000',
+								'paySendUrl' => $sites . '/pay/rspayment.php?channel=UPI_QR&tyid=3030',
 								'parameters' => '',
 								'startTime' => '00:00',
 								'endTime' => '24:00',
@@ -532,14 +531,12 @@
 								'c2cUnitAmount' => null,
 								'quickConfig' => '',
 								'quickConfigList' => [
-									['rechargeAmount' => 100.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 2000.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 5000.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 10000.0, 'giftAmount' => 0.0],
-									['rechargeAmount' => 50000.0, 'giftAmount' => 0.0],
+['rechargeAmount' => 200.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 300.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 500.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 1000.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 2000.0, 'giftAmount' => 0.0],
+										['rechargeAmount' => 5000.0, 'giftAmount' => 0.0],
 								],
 								'random' => 0.8192269882695508,
 								'sort' => 89999,
