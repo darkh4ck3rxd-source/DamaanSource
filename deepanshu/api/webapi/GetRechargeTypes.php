@@ -514,7 +514,7 @@
 						// Rupayex is a separate new deposit channel; existing channels remain unchanged.
 $rspaymentEnabled = getenv('RSPAYMENT_ENABLED') === false
 				|| trim((string)getenv('RSPAYMENT_ENABLED')) === '1';
-			if ((int)$payid === 1 && $rspaymentEnabled) {
+			if ((int)$payid === 2 && $rspaymentEnabled) {
 							array_unshift($data['rechargetypelist'], [
 								'payTypeID' => 3030,
 								'payID' => 1,
