@@ -20,6 +20,14 @@ function rspayment_redirect_fallback(array $query = []): never
     exit;
 }
 
+function rspayment_invalid_request(): never
+{
+    http_response_code(422);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo 'Invalid deposit amount. Choose ₹200, ₹300, ₹500, ₹1000, ₹2000, or ₹5000.';
+    exit;
+}
+
 function rspayment_fail_order(mysqli $conn, string $orderId): void
 {
     $stmt = $conn->prepare("UPDATE thevani SET sthiti = '2' WHERE dharavahi = ? AND sthiti = '0'");
@@ -35,13 +43,13 @@ $userId = filter_input(INPUT_GET, 'uid', FILTER_VALIDATE_INT);
 $allowedAmounts = [200, 300, 500, 1000, 2000, 5000];
 
 if ($amount === false || $amount === null || $userId === false || $userId === null) {
-    rspayment_redirect_fallback($_GET);
+    rspayment_invalid_request();
 }
 
 $amount = round((float)$amount, 2);
 $userId = (int)$userId;
 if ($userId < 1 || !in_array((int)$amount, $allowedAmounts, true) || $amount !== (float)(int)$amount) {
-    rspayment_redirect_fallback($_GET);
+    rspayment_invalid_request();
 }
 
 $orderId = 'JW' . date('YmdHis') . random_int(100000, 999999);
@@ -96,7 +104,7 @@ $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 $response = is_string($raw) ? json_decode($raw, true) : null;
-$status = strtolower(trim((string)($response['status'] ?? '')));
+$status = strtolower(trim((string)($response['status'] ?? $response['data']['status'] ?? '')));
 $payUrl = trim((string)($response['data']['payUrl'] ?? $response['payUrl'] ?? ''));
 $success = $curlError === '' && $httpCode >= 200 && $httpCode < 300 && $status === 'success' && preg_match('#^https://#i', $payUrl) === 1;
 
