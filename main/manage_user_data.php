@@ -36,7 +36,16 @@
 	// The `db` parameter represents the column name in the database.  
 	// The `dt` parameter represents the DataTables column identifier. 
 	$columns = array( 
-		array( 'db' => 'mobile', 'dt' => 0 ),  
+		array(
+				'db' => 'mobile',
+				'dt' => 0,
+				'formatter' => function ($d, $row) {
+					$id = (int)$row['id'];
+					$mobile = htmlspecialchars((string)$d, ENT_QUOTES, 'UTF-8');
+					$mobileArg = htmlspecialchars(json_encode((string)$d, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
+					return $mobile . ' <a href="javascript:void(0)" onclick="editMobile(' . $id . ',' . $mobileArg . ')" class="text-aqua" title="Change mobile number"><i class="fa fa-edit"></i></a>';
+				}
+			),
 		array( 'db' => 'owncode', 'dt' => 1 ), 
 		array( 'db' => 'code', 'dt' => 2 ), 
 		array( 'db' => 'id', 'dt' => 3 ), 

@@ -5,8 +5,12 @@
 	}
 ?>
 <?php
-	include ("conn.php");
-?>
+		include ("conn.php");
+		if (empty($_SESSION['manage_user_csrf'])) {
+			$_SESSION['manage_user_csrf'] = bin2hex(random_bytes(32));
+		}
+		$manageUserCsrf = $_SESSION['manage_user_csrf'];
+	?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -197,8 +201,31 @@
 				</div>
 			</div>
          
-		</div>
-		<footer class="footer">
+			</div>
+			<div id="mobileModal" class="modal fade" role="dialog" aria-labelledby="mobileModalTitle" aria-hidden="true">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title" id="mobileModalTitle">Change mobile number</h4>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						</div>
+						<form id="mobileForm" method="post" novalidate>
+							<div class="modal-body">
+								<div class="form-group">
+									<label for="mobileValue">Mobile number</label>
+									<input class="form-control" id="mobileValue" name="mobile" type="tel" inputmode="numeric" pattern="[0-9]{7,15}" maxlength="15" required>
+									<input id="mobileUserId" name="user_id" type="hidden">
+									<input name="csrf_token" type="hidden" value="<?= htmlspecialchars($manageUserCsrf, ENT_QUOTES, 'UTF-8') ?>">
+									<small class="form-text text-muted">Use 7 to 15 digits. The number cannot belong to another user.</small>
+									<div id="mobileError" class="text-danger mt-2" role="alert"></div>
+								</div>
+							</div>
+							<div class="modal-footer"><button type="submit" class="btn btn-primary" id="saveMobile">Save</button></div>
+						</form>
+					</div>
+				</div>
+			</div>
+			<footer class="footer">
 			<div class="d-sm-flex justify-content-center justify-content-sm-between">
 				<span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © Rᴜᴅʀᴀɴsʜ 2025</span>
 			</div>
@@ -246,7 +273,45 @@
         });
       });
     });
-	function edit(id,mob,balance) {
+			function editMobile(id, mob) {
+			$('#mobileModal').modal({backdrop: 'static', keyboard: false});
+			$('#mobileUserId').val(id);
+			$('#mobileValue').val(String(mob));
+			$('#mobileError').text('');
+			$('#mobileModal').modal('show');
+		}
+
+		$('#mobileForm').on('submit', function (e) {
+			e.preventDefault();
+			var form = this;
+			var mobile = String($('#mobileValue').val()).trim();
+			if (!/^[0-9]{7,15}$/.test(mobile)) {
+				$('#mobileError').text('Enter a valid mobile number with 7 to 15 digits.');
+				return;
+			}
+			$('#saveMobile').prop('disabled', true);
+			$('#mobileError').text('');
+			$.ajax({
+				type: 'POST', url: 'updateUserMobile.php', data: new FormData(form), contentType: false, processData: false,
+				success: function (response) {
+					if (response && response.ok) {
+						alert(response.message);
+						$('#mobileModal').modal('hide');
+						$('#example1').DataTable().ajax.reload(null, false);
+					} else {
+						$('#mobileError').text((response && response.message) || 'Could not update mobile number.');
+					}
+				},
+				error: function (xhr) {
+					var response = xhr.responseJSON || {};
+					$('#mobileError').text(response.message || 'Could not update mobile number.');
+				},
+				complete: function () { $('#saveMobile').prop('disabled', false); }
+			});
+		});
+
+		function edit(id,mob,balance) {
+
 		$('#excel').modal({backdrop: 'static', keyboard: false})   
 		$('#excel').modal('show');
 		document.getElementById('mob').innerHTML = 'Mobile: '+mob;
